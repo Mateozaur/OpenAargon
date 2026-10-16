@@ -1,8 +1,7 @@
 package io.github.phantamanta44.openar.game.piece;
 
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.phantamanta44.openar.Aargon;
-import io.github.phantamanta44.openar.game.piece.impl.PieceAir;
+import io.github.phantamanta44.openar.game.piece.impl.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,17 +12,24 @@ public class PieceRegistry {
 	public static final IGamePiece EMPTY = new PieceAir();
 
 	public static void init() {
-		new FastClasspathScanner("io.github.phantamanta44.openar.game.piece.impl")
-				.matchAllClasses(c -> {
-					try {
-						if (IGamePiece.class.isAssignableFrom(c))
-							registerPiece((IGamePiece)c.newInstance());
-					} catch (Exception e) {
-						Aargon.getLogger().warn("Errored while registering piece {}!", c.getName());
-						e.printStackTrace();
-					}
-				})
-				.scan();
+		registerPiece(new PieceAir());
+		registerPiece(new PieceBorder());
+		registerPiece(new PieceCoin());
+		registerPiece(new PieceDoubleMirror());
+		registerPiece(new PieceDoubleSlit());
+		registerPiece(new PieceFilter());
+		registerPiece(new PieceMine());
+		registerPiece(new PieceMirror());
+		registerPiece(new PieceOneWay());
+		registerPiece(new PiecePolarizer());
+		registerPiece(new PiecePrism());
+		registerPiece(new PieceRefractor());
+		registerPiece(new PieceSlime());
+		registerPiece(new PieceSource());
+		registerPiece(new PieceSplitter());
+		registerPiece(new PieceTNT());
+		registerPiece(new PieceThreeWay());
+		registerPiece(new PieceWall());
 	}
 
 	public static void registerPiece(IGamePiece piece) {
