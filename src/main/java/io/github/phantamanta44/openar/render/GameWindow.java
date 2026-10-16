@@ -1,7 +1,6 @@
 package io.github.phantamanta44.openar.render;
 
 import io.github.phantamanta44.openar.Aargon;
-import io.github.phantamanta44.openar.Main;
 import io.github.phantamanta44.openar.util.IOUtils;
 import io.github.phantamanta44.openar.util.math.IntVector;
 import org.lwjgl.BufferUtils;
@@ -9,12 +8,12 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 import java.util.Deque;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameWindow {
@@ -35,7 +34,6 @@ public class GameWindow {
 	private long winId;
 	private int vaoId, vboId, quadShaderId, lineShaderId;
 
-	private Future<?> graphicsThread;
 
 	private GLFWWindowSizeCallback windowSizeCb;
 	private AtomicBoolean windowResized = new AtomicBoolean();
@@ -43,88 +41,119 @@ public class GameWindow {
 
 	public void init() {
 		ar = Aargon.getInstance();
-		graphicsThread = ar.getThreadPool().submit(() -> {
-			try {
-				errorCb = GLFWErrorCallback.createPrint();
-				GLFW.glfwSetErrorCallback(errorCb);
 
-				if (GLFW.glfwInit() != GLFW.GLFW_TRUE)
-					throw new IllegalStateException("Could not initialize GLFW!");
+		errorCb = GLFWErrorCallback.createPrint();
+		GLFW.glfwSetErrorCallback(errorCb);
 
-				GLFW.glfwDefaultWindowHints();
-				GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
-				GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
+		if (!GLFW.glfwInit())
+			throw new IllegalStateException("Could not initialize GLFW!");
 
-				winId = GLFW.glfwCreateWindow(DEF_WIDTH, DEF_HEIGHT, "OpenAargon", MemoryUtil.NULL, MemoryUtil.NULL);
-				if (winId == MemoryUtil.NULL)
-					throw new IllegalStateException("Could not initialize window!");
+		GLFW.glfwDefaultWindowHints();
+		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
+		GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
 
-				GLFW.glfwSetKeyCallback(winId, ar.getInputManager().getKeyCallback());
-				GLFW.glfwSetMouseButtonCallback(winId, ar.getInputManager().getMouseCallback());
-				GLFW.glfwSetCursorPosCallback(winId, ar.getInputManager().getCursorCallback());
-				windowSizeCb = new GLFWWindowSizeCallback() {
-					@Override
-					public void invoke(long id, int w, int h) {
-						windowSize.setX(w).setY(h);
-						windowResized.set(true);
-					}
-				};
-				GLFW.glfwSetWindowSizeCallback(winId, windowSizeCb);
+		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
+		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);
 
-				GLFWVidMode vidMode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
-				GLFW.glfwSetWindowPos(winId, (vidMode.width() - DEF_WIDTH) / 2, (vidMode.height() - DEF_HEIGHT) / 2);
+		winId = GLFW.glfwCreateWindow(
+				DEF_WIDTH,
+				DEF_HEIGHT,
+				"OpenAargon",
+				MemoryUtil.NULL,
+				MemoryUtil.NULL
+		);
 
-				GLFW.glfwMakeContextCurrent(winId);
-				GLFW.glfwSwapInterval(1);
+		if (winId == MemoryUtil.NULL)
+			throw new IllegalStateException("Could not initialize window!");
 
-				GL.createCapabilities();
+		GLFW.glfwSetKeyCallback(winId, ar.getInputManager().getKeyCallback());
+		GLFW.glfwSetMouseButtonCallback(winId, ar.getInputManager().getMouseCallback());
+		GLFW.glfwSetCursorPosCallback(winId, ar.getInputManager().getCursorCallback());
 
-				vaoId = GL30.glGenVertexArrays();
-				GL30.glBindVertexArray(vaoId);
-				vboId = GL15.glGenBuffers();
-				GL30.glBindVertexArray(0);
-
-				initShaders();
-				GL11.glClearColor(0F, 0F, 0F, 1F);
-				GL11.glEnable(GL11.GL_BLEND);
-				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-				GL11.glEnable(GL11.GL_LINE_SMOOTH);
-				GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
-
-				GL11.glViewport(0, 0, windowSize.getX(), windowSize.getY());
-
-				while (GLFW.glfwWindowShouldClose(winId) == GLFW.GLFW_FALSE) {
-					if (windowResized.getAndSet(false))
-						GL11.glViewport(0, 0, windowSize.getX(), windowSize.getY());
-
-					GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-
-					ar.bufferRenders(WORLD_WIDTH, WORLD_HEIGHT, (float)windowSize.getX() / (float)windowSize.getY());
-
-					render();
-					GLFW.glfwSwapBuffers(winId);
-
-					GLFW.glfwPollEvents();
-				}
-			} catch (Exception e) {
-				Aargon.getLogger().error("Graphics thread errored!");
-				e.printStackTrace();
-			} finally {
-				destruct();
-				new Thread(Main::exitRequested, "Exit Thread").run();
+		windowSizeCb = new GLFWWindowSizeCallback() {
+			@Override
+			public void invoke(long id, int w, int h) {
+				windowSize.setX(w).setY(h);
+				windowResized.set(true);
 			}
-		});
+		};
+
+		GLFW.glfwSetWindowSizeCallback(winId, windowSizeCb);
+
+		GLFWVidMode vidMode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+		if (vidMode != null) {
+			GLFW.glfwSetWindowPos(
+					winId,
+					(vidMode.width() - DEF_WIDTH) / 2,
+					(vidMode.height() - DEF_HEIGHT) / 2
+			);
+		}
+
+		GLFW.glfwMakeContextCurrent(winId);
+		GLFW.glfwSwapInterval(1);
+
+		GL.createCapabilities();
+
+		vaoId = GL30.glGenVertexArrays();
+		GL30.glBindVertexArray(vaoId);
+
+		vboId = GL15.glGenBuffers();
+
+		GL30.glBindVertexArray(0);
+
+		initShaders();
+
+		GL11.glClearColor(0F, 0F, 0F, 1F);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+		GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
+
+		GL11.glViewport(0, 0, windowSize.getX(), windowSize.getY());
 	}
 
 	public void show() {
 		GLFW.glfwShowWindow(winId);
+
+		try {
+			while (!GLFW.glfwWindowShouldClose(winId)) {
+				if (windowResized.getAndSet(false))
+					GL11.glViewport(0, 0, windowSize.getX(), windowSize.getY());
+
+				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+
+				ar.bufferRenders(
+						WORLD_WIDTH,
+						WORLD_HEIGHT,
+						(float)windowSize.getX() / (float)windowSize.getY()
+				);
+
+				render();
+
+				GLFW.glfwSwapBuffers(winId);
+				GLFW.glfwPollEvents();
+			}
+		} catch (Exception e) {
+			Aargon.getLogger().error("Graphics loop errored!");
+			e.printStackTrace();
+		} finally {
+			destruct();
+		}
 	}
 
 	public void destruct() {
-		graphicsThread.cancel(true);
-		GLFW.glfwDestroyWindow(winId);
+		if (winId != MemoryUtil.NULL) {
+			Callbacks.glfwFreeCallbacks(winId);
+			GLFW.glfwDestroyWindow(winId);
+			winId = MemoryUtil.NULL;
+		}
+
 		GLFW.glfwTerminate();
-		errorCb.release();
+
+		if (errorCb != null) {
+			errorCb.free();
+			errorCb = null;
+		}
 	}
 
 	public long getWindowId() {
@@ -265,7 +294,7 @@ public class GameWindow {
 		for (int shader : shaders)
 			GL20.glAttachShader(progId, shader);
 		GL20.glLinkProgram(progId);
-		if (GL20.glGetShaderi(progId, GL20.GL_LINK_STATUS) == GL11.GL_FALSE)
+		if (GL20.glGetProgrami(progId, GL20.GL_LINK_STATUS) == GL11.GL_FALSE)
 			Aargon.getLogger().warn("Shader program link failure! {}", GL20.glGetProgramInfoLog(progId));
 		for (int shader : shaders)
 			GL20.glDetachShader(progId, shader);

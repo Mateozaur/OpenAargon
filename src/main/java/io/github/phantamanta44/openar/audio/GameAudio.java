@@ -11,8 +11,8 @@ public class GameAudio {
 
 	private static final float[] EMPTY_3F = new float[] {0F, 0F, 0F};
 
-	private ALContext ctx;
-	private ALDevice dev;
+	private long context;
+	private long device;
 
 	private int[] audioBufs;
 	private int currentBuf = 0;
@@ -29,26 +29,30 @@ public class GameAudio {
 		listVel = genEmpty3F();
 		listOri = genFloatBuf(0F, 0F, -1F, 0F, 1F, 0F);
 
-		ctx = ALContext.create();
-		dev = ctx.getDevice();
-		ctx.makeCurrent();
+		device = ALC10.alcOpenDevice((ByteBuffer)null);
+		if (device == 0L)
+			throw new IllegalStateException("Could not open audio device!");
 
-		if (!dev.getCapabilities().OpenALC10)
+		ALCCapabilities alcCapabilities = ALC.createCapabilities(device);
+		if (!alcCapabilities.OpenALC10)
 			throw new IllegalStateException("Audio system not supported!");
 
-		AL.createCapabilities(dev.address());
+		context = ALC10.alcCreateContext(device, (int[])null);
+		if (context == 0L)
+			throw new IllegalStateException("Could not create audio context!");
 
-		ByteBuffer bufBuf = BufferUtils.createByteBuffer(Integer.BYTES * 4);
-		AL10.alGenBuffers(4, bufBuf);
+		if (!ALC10.alcMakeContextCurrent(context))
+			throw new IllegalStateException("Could not activate audio context!");
+
+		AL.createCapabilities(alcCapabilities);
+
+		audioBufs = new int[4];
+		AL10.alGenBuffers(audioBufs);
 		errorCheck("Failed to initialize audio buffers!");
-		bufBuf.position(bufBuf.limit()).flip();
-		audioBufs = arrayify(bufBuf, 4);
 
-		ByteBuffer srcBuf = BufferUtils.createByteBuffer(Integer.BYTES * 4);
-		AL10.alGenSources(4, srcBuf);
+		srcArray = new int[4];
+		AL10.alGenSources(srcArray);
 		errorCheck("Failed to initialize audio sources!");
-		srcBuf.position(srcBuf.limit()).flip();
-		srcArray = arrayify(srcBuf, 4);
 
 		AL10.alListenerfv(AL10.AL_POSITION, listPos);
 		AL10.alListenerfv(AL10.AL_VELOCITY, listVel);
@@ -64,22 +68,24 @@ public class GameAudio {
 
 	private int nextBuffer() {
 		int bufId = audioBufs[currentBuf];
-		currentBuf = (currentBuf + 1) % 4;
+		currentBuf = (currentBuf + 1) % audioBufs.length;
 		return bufId;
 	}
 
 	private int nextSrc() {
-		int bufId = srcArray[currentSrc];
-		currentSrc = (currentSrc + 1) % 4;
-		return bufId;
+		int srcId = srcArray[currentSrc];
+		currentSrc = (currentSrc + 1) % srcArray.length;
+		return srcId;
 	}
 
 	void play(int format, ByteBuffer data, int freq) {
 		int bId = nextBuffer(), src = nextSrc();
+
 		AL10.alSourceStop(src);
 		AL10.alSourceUnqueueBuffers(src);
 		AL10.alBufferData(bId, format, data, freq);
 		AL10.alSourceQueueBuffers(src, bId);
+
 		AL10.alSourcef(src, AL10.AL_PITCH, 1F);
 		AL10.alSourcef(src, AL10.AL_GAIN, 1F);
 		AL10.alSourcefv(src, AL10.AL_POSITION, srcPos);
@@ -88,17 +94,23 @@ public class GameAudio {
 	}
 
 	public void destruct() {
-		ByteBuffer bufBuf = BufferUtils.createByteBuffer(Integer.BYTES * audioBufs.length);
-		for (int buf : audioBufs)
-			bufBuf.putInt(buf);
-		AL10.alDeleteSources(audioBufs.length, (ByteBuffer)bufBuf.flip());
-		ByteBuffer srcBuf = BufferUtils.createByteBuffer(Integer.BYTES * srcArray.length);
-		for (int src : srcArray)
-			srcBuf.putInt(src);
-		AL10.alDeleteBuffers(srcArray.length, (ByteBuffer)srcBuf.flip());
-		ALC10.alcCloseDevice(dev.address());
-		ALC10.alcDestroyContext(ctx.address());
-		ALC.destroy();
+		if (srcArray != null)
+			AL10.alDeleteSources(srcArray);
+
+		if (audioBufs != null)
+			AL10.alDeleteBuffers(audioBufs);
+
+		ALC10.alcMakeContextCurrent(0L);
+
+		if (context != 0L) {
+			ALC10.alcDestroyContext(context);
+			context = 0L;
+		}
+
+		if (device != 0L) {
+			ALC10.alcCloseDevice(device);
+			device = 0L;
+		}
 	}
 
 	private static FloatBuffer genEmpty3F() {
@@ -107,13 +119,6 @@ public class GameAudio {
 
 	private static FloatBuffer genFloatBuf(float... f) {
 		return (FloatBuffer)BufferUtils.createFloatBuffer(f.length).put(f).flip();
-	}
-
-	private static int[] arrayify(ByteBuffer buf, int n) {
-		int[] results = new int[n];
-		for (int i = 0; i < n; i++)
-			results[i] = buf.getInt(Integer.BYTES * i);
-		return results;
 	}
 
 }

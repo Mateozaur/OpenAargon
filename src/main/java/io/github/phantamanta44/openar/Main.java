@@ -34,6 +34,7 @@ public class Main {
 			fail(1);
 		}
 		Aargon.getInstance().getWindowManager().show();
+		Aargon.onExit();
 	}
 
 	private static File showFileDialog() {
