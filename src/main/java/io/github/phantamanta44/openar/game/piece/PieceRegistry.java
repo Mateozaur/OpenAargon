@@ -13,7 +13,7 @@ public class PieceRegistry {
 	public static final IGamePiece EMPTY = new PieceAir();
 
 	public static void init() {
-		FastClasspathScanner scanner = new FastClasspathScanner("io.github.phantamanta44.openar.game.piece.impl")
+		new FastClasspathScanner("io.github.phantamanta44.openar.game.piece.impl")
 				.matchAllClasses(c -> {
 					try {
 						if (IGamePiece.class.isAssignableFrom(c))
