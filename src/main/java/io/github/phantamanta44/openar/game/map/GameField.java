@@ -5,12 +5,15 @@ import io.github.phantamanta44.openar.game.beam.Beam;
 import io.github.phantamanta44.openar.game.beam.BeamTile;
 import io.github.phantamanta44.openar.game.beam.Direction;
 import io.github.phantamanta44.openar.game.piece.*;
+import io.github.phantamanta44.openar.game.piece.impl.PieceLegacyStub;
+import io.github.phantamanta44.openar.game.piece.impl.PieceWall;
 import io.github.phantamanta44.openar.render.Line4I;
 import io.github.phantamanta44.openar.render.Quad8I;
 import io.github.phantamanta44.openar.render.RenderManager;
 import io.github.phantamanta44.openar.util.Array2D;
 import io.github.phantamanta44.openar.util.math.FloatVector;
 import io.github.phantamanta44.openar.util.math.IntVector;
+import io.github.phantamanta44.openar.render.legacy.LegacyRenderResolver;
 
 public class GameField implements IGameField {
 
@@ -126,16 +129,51 @@ public class GameField implements IGameField {
 
 	public synchronized void bufferRenders(float xSize, float ySize, float ratio) {
 		int origX = (int)-xSize, origY = (int)(ySize / ratio);
+
 		pieceGrid.forEach((p, c) -> {
-			if (p != null) {
-				int rot = getRotation(c), meta = getMeta(c);
+			int x = origX + c.getX() * 103;
+			int y = origY - (c.getY() + 1) * 103;
+
+			if (p == null || " ".equals(p.getToken())) {
+				RenderManager.bufferQuad(new Quad8I(
+						EMPTY_SLOT_PATH, x, y, 103, 103, 0, 0, 32, 32));
+				return;
+			}
+
+			int rot = getRotation(c);
+			int meta = getMeta(c);
+
+			/*
+			 * Use Collector's Edition legacy rendering only where OpenAargon's
+			 * existing renderer is incomplete: full Wall variants and pieces that
+			 * currently exist only as PieceLegacyStub. Existing implemented pieces
+			 * keep their own rendering so animation and special logic are preserved.
+			 */
+			boolean useLegacyRenderer = p instanceof PieceWall || p instanceof PieceLegacyStub;
+			LegacyRenderResolver.Sprite legacySprite = useLegacyRenderer
+					? LegacyRenderResolver.resolve(p.getToken(), rot, meta)
+					: null;
+
+			if (legacySprite != null) {
+				RenderManager.bufferQuad(new Quad8I(
+						EMPTY_SLOT_PATH, x, y, 103, 103, 0, 0, 32, 32));
+
+				RenderManager.bufferQuad(new Quad8I(
+						legacySprite.getTexturePath(),
+						x, y, 103, 103,
+						legacySprite.getTextureOffset().getX(),
+						legacySprite.getTextureOffset().getY(),
+						32, 32));
+			} else {
 				String path = p.getTexturePath(this, c, rot, meta);
 				IntVector offset = p.getTextureOffset(this, c, rot, meta);
-				RenderManager.bufferQuad(new Quad8I(path, origX + c.getX() * 103, origY - (c.getY() + 1) * 103, 103, 103, offset.getX(), offset.getY(), 32, 32));
+
+				RenderManager.bufferQuad(new Quad8I(
+						path, x, y, 103, 103,
+						offset.getX(), offset.getY(), 32, 32));
 			}
-			else
-				RenderManager.bufferQuad(new Quad8I(EMPTY_SLOT_PATH, origX + c.getX() * 103, origY - (c.getY() + 1) * 103, 103, 103, 0, 0, 32, 32));
 		});
+
 		beamGrid.forEach((b, c) -> {
 			for (Direction dir : Direction.values()) {
 				if (b.getOut(dir) != null) {

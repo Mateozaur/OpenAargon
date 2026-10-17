@@ -2,6 +2,8 @@ package io.github.phantamanta44.openar;
 
 import io.github.phantamanta44.openar.game.map.MapFile;
 import io.github.phantamanta44.openar.util.TextUtils;
+import io.github.phantamanta44.openar.render.legacy.LegacyRenderResolver;
+import io.github.phantamanta44.openar.render.legacy.LegacyTileSet;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -25,6 +27,12 @@ public class Main {
 			Aargon.getLogger().error("No map file!");
 			fail(1);
 		}
+        LegacyTileSet tileSet = LegacyTileSet.detect(file);
+        LegacyRenderResolver.setTileSet(tileSet);
+
+        Aargon.getLogger().info(
+            "Using legacy tileset: {}",
+            tileSet.getId());
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			MapFile map = MapFile.parse(reader.lines().toArray(String[]::new));
 			Aargon.getInstance().setMap(map);

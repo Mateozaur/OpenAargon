@@ -2,6 +2,7 @@ package io.github.phantamanta44.openar.game.piece;
 
 import io.github.phantamanta44.openar.Aargon;
 import io.github.phantamanta44.openar.game.piece.impl.*;
+import io.github.phantamanta44.openar.game.piece.impl.PieceLegacyStub;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +31,16 @@ public class PieceRegistry {
 		registerPiece(new PieceTNT());
 		registerPiece(new PieceThreeWay());
 		registerPiece(new PieceWall());
+        registerPiece(new PieceLegacyStub("Light Bender", "@"));
+        registerPiece(new PieceLegacyStub("Selector", "I"));
+        registerPiece(new PieceLegacyStub("Convert", "J"));
+        registerPiece(new PieceLegacyStub("Complex", "L"));
+        registerPiece(new PieceLegacyStub("Prismirror", "M"));
+        registerPiece(new PieceLegacyStub("Fuel Cell", "c"));
+        registerPiece(new PieceLegacyStub("Black Hole", "h"));
+        registerPiece(new PieceLegacyStub("Spaceship", "p"));
+        registerPiece(new PieceLegacyStub("Water", "w"));
+        registerPiece(new PieceLegacyStub("Splicer", "y"));
 	}
 
 	public static void registerPiece(IGamePiece piece) {
