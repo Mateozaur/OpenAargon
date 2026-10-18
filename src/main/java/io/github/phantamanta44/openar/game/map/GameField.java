@@ -5,6 +5,7 @@ import io.github.phantamanta44.openar.game.beam.Beam;
 import io.github.phantamanta44.openar.game.beam.BeamTile;
 import io.github.phantamanta44.openar.game.beam.Direction;
 import io.github.phantamanta44.openar.game.piece.*;
+import io.github.phantamanta44.openar.game.piece.impl.PieceBorder;
 import io.github.phantamanta44.openar.game.piece.impl.PieceLegacyStub;
 import io.github.phantamanta44.openar.game.piece.impl.PieceWall;
 import io.github.phantamanta44.openar.render.Line4I;
@@ -14,6 +15,7 @@ import io.github.phantamanta44.openar.util.Array2D;
 import io.github.phantamanta44.openar.util.math.FloatVector;
 import io.github.phantamanta44.openar.util.math.IntVector;
 import io.github.phantamanta44.openar.render.legacy.LegacyRenderResolver;
+import io.github.phantamanta44.openar.render.legacy.LegacyTileSet;
 
 public class GameField implements IGameField {
 
@@ -149,7 +151,10 @@ public class GameField implements IGameField {
 			 * currently exist only as PieceLegacyStub. Existing implemented pieces
 			 * keep their own rendering so animation and special logic are preserved.
 			 */
-			boolean useLegacyRenderer = p instanceof PieceWall || p instanceof PieceLegacyStub;
+			boolean useLegacyRenderer =  p instanceof PieceWall
+                                         || p instanceof PieceLegacyStub
+                                         || (p instanceof PieceBorder
+                                            && LegacyRenderResolver.getTileSet() == LegacyTileSet.HOTTER);
 			LegacyRenderResolver.Sprite legacySprite = useLegacyRenderer
 					? LegacyRenderResolver.resolve(p.getToken(), rot, meta)
 					: null;

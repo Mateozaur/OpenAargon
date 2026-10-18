@@ -5,8 +5,13 @@ import io.github.phantamanta44.openar.game.beam.BeamTile;
 import io.github.phantamanta44.openar.game.piece.IGamePiece;
 import io.github.phantamanta44.openar.game.piece.PieceRegistry;
 import io.github.phantamanta44.openar.game.piece.impl.PieceAir;
+import io.github.phantamanta44.openar.game.piece.impl.PieceBorder;
+import io.github.phantamanta44.openar.game.piece.impl.PieceLegacyStub;
+import io.github.phantamanta44.openar.game.piece.impl.PieceWall;
 import io.github.phantamanta44.openar.render.Quad8I;
 import io.github.phantamanta44.openar.render.RenderManager;
+import io.github.phantamanta44.openar.render.legacy.LegacyRenderResolver;
+import io.github.phantamanta44.openar.render.legacy.LegacyTileSet;
 import io.github.phantamanta44.openar.util.math.IntVector;
 
 public class MovementHandler {
@@ -112,11 +117,35 @@ public class MovementHandler {
 
 	public synchronized void bufferRenders(float xSize, float ySize, float ratio) {
 		if (holdingPiece() && hasMoved) {
-			String path = held.piece.getTexturePath(held, IntVector.ZERO, held.rot, held.meta);
-			IntVector offset = held.piece.getTextureOffset(held, IntVector.ZERO, held.rot, held.meta);
-			RenderManager.bufferQuad(new Quad8I(path, (int) ((float) mouseCoords.getX() * 1.965F - xSize - 52F),
+			boolean useLegacyRenderer =
+					held.piece instanceof PieceWall
+					|| held.piece instanceof PieceLegacyStub
+					|| (held.piece instanceof PieceBorder
+						&& LegacyRenderResolver.getTileSet() == LegacyTileSet.HOTTER);
+
+			LegacyRenderResolver.Sprite legacySprite =
+					useLegacyRenderer
+							? LegacyRenderResolver.resolve(held.piece.getToken(), held.rot, held.meta)
+							: null;
+
+			String path;
+			IntVector offset;
+
+			if (legacySprite != null) {
+				path = legacySprite.getTexturePath();
+				offset = legacySprite.getTextureOffset();
+			} else {
+				path = held.piece.getTexturePath(held, IntVector.ZERO, held.rot, held.meta);
+				offset = held.piece.getTextureOffset(held, IntVector.ZERO, held.rot, held.meta);
+			}
+
+			RenderManager.bufferQuad(new Quad8I(
+					path,
+					(int) ((float) mouseCoords.getX() * 1.965F - xSize - 52F),
 					(int) ((ySize / ratio) - (float) mouseCoords.getY() * 1.965F - 52F),
-					103, 103, offset.getX(), offset.getY(), 32, 32));
+					103, 103,
+					offset.getX(), offset.getY(),
+					32, 32));
 		}
 	}
 
