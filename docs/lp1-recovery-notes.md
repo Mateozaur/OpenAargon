@@ -2,86 +2,66 @@
 
 _Last updated: 2026-10-18_
 
-Hand-off source of truth for the Collector's Edition LP1 rendering investigation and migration on `Mateozaur/OpenAargon`, branch `linux-modernization`.
+Hand-off source of truth for `Mateozaur/OpenAargon`, branch `linux-modernization`.
 
-## Long-term target
+## Goal
 
-Preserve original CE **semantics and appearance**, but do not preserve the original runtime rendering tricks as the OpenAargon architecture.
+Preserve original CE **semantics/appearance** without preserving original runtime rendering tricks. PCE/`black_tiles*` remain compatibility/import truth, not the target runtime API.
 
 ```text
 legacy map/PCE/assets
-  -> compatibility/import translation
+  -> compatibility translation
   -> canonical semantic visual state
   -> PieceVisualCatalog/style resolver
-  -> arbitrary style sprite/animation resources
+  -> arbitrary style resources
 ```
 
-PCE files and `black_tiles*.bmp` are authoritative evidence for compatibility/import, not the desired public runtime API. Renderer/style code should consume semantic identities such as an oriented border edge/corner, not raw PCE rotations or tile numbers.
+Styles should consume semantic identities (e.g. oriented border edge/corner), not PCE rotation/tile numbers.
 
 ## Safety rule
 
-Do **not** add speculative rows to `src/main/resources/legacy/styles/lp1.csv`. A raw LP1 override needs a concrete verified semantic deviation. Prefer migrating concrete failures to semantic visuals instead of adding another atlas trick.
+Do not add speculative `legacy/styles/lp1.csv` rows. Prefer semantic migration of concrete failures over new atlas tricks.
 
-## Historical LP1 contract — high confidence
+## Historical LP1 contract — resolved
 
-Original CE LP1 generally preserves shared PCE picture-index semantics while replacing the ordinary `black_tiles.bmp` with a pack-local same-named sheet.
+Original CE LP1 generally preserves shared PCE picture-index semantics while replacing ordinary `black_tiles.bmp` with a pack-local same-named sheet.
 
 Confirmed:
-- `legacy/render-map.csv` is shared token/state mapping; style CSVs are sparse overrides.
-- `atlas=base` selects current style; explicit `exp1`/`exp2` remain shared.
-- `Pieces/*.pce` are authoritative for token/state -> picture index and logical tile-sheet family.
-- `blank.pce` documents ordinary defaults `black_tiles.bmp` / `black_tiles_small.bmp`.
-- LP1 has no alternate PCE corpus or map-level remap table.
-- real LP1 maps use shared piece tokens.
-- LP1 has pack-local ordinary sheets but no local `black_tiles_exp*`.
-- LP1-LP4 all repeat the same pack-local ordinary-sheet convention.
+- shared `render-map.csv`, sparse style overrides;
+- `atlas=base` selects style; explicit exp1/exp2 remain shared;
+- PCE tables authoritative for token/state -> index + logical sheet;
+- LP1 no alternate PCE corpus/remap table;
+- LP1 no local expansion sheets;
+- LP1-LP4 repeat pack-local ordinary-sheet convention.
 
-Representative original blobs/sizes:
+Representative blobs:
 ```text
-base black_tiles.bmp       921654  2c1cebca0a437c2080352e48425150d3c374a533
-LP1  black_tiles.bmp       921654  768d05581ab0a2a39beb9e29c492e869d07eb2fe
-LP1  black_tiles_small.bmp  57654  e27ac267529a3f56020508c07775414f114a4032
+base black_tiles.bmp 921654 2c1cebca0a437c2080352e48425150d3c374a533
+LP1  black_tiles.bmp 921654 768d05581ab0a2a39beb9e29c492e869d07eb2fe
+LP1  small           57654 e27ac267529a3f56020508c07775414f114a4032
 ```
 
-Base/LP1 full BMP headers were decoded through ranged base64 reads: 640x480, 24-bit BI_RGB, pixel offset 54, 921600-byte pixel payload, 921654 total. LP3's historical +2 bytes were confirmed to be two extra terminal zero bytes / `biSizeImage` quirk, not different geometry.
+Base/LP1 full BMP headers confirmed 640x480, 24-bit BI_RGB, offset 54, payload 921600. LP3 +2-byte files are same geometry with two terminal NUL bytes / `biSizeImage` quirk.
 
-Conclusion: **no global LP1 index remap**. This is compatibility truth only; modern rendering should still leave raw indices behind.
+**Do not globally remap LP1 indices.** This is historical compatibility truth; modern runtime may discard raw indices.
 
-## Atlas provenance / tool limits
+## Provenance / tool limits
 
-Legacy atlas introduction commit:
-```text
-2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8
-Add Collector's Edition legacy rendering support
-```
-Its parent `98625d829872afc6a3aad6a6c89bef0261781079` only changes border T-junction rendering; no conversion script provenance was found.
+Legacy atlas intro commit: `2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8` (`Add Collector's Edition legacy rendering support`). Parent `98625d829872afc6a3aad6a6c89bef0261781079` only changed border T-junction rendering; no conversion script found.
 
-Known PNG blobs:
-```text
-base.png e1e903a202b7d8c301f46cfa12291abe4a383ae4
-lp1.png  87ab0fe3c09e2e26dca009d21e50791cfa1e3570
-```
+Known PNG blobs: base `e1e903a2...`, lp1 `87ab0fe3...`.
 
-Complete BMP<->PNG pixel comparison remains unavailable: direct binary blob fetch failed UTF-8 decoding; base64 ranged reads work but full reconstruction is impractical; raw GitHub/web/container materialization attempts also failed. GitHub indexed code/commit search is known to miss existing content, so negative searches are not absence evidence.
+Full BMP<->PNG comparison remains unavailable. Base64 ranged reads work; full binary materialization did not. GitHub indexed search is unreliable and missed known content, so search negatives are not absence evidence.
 
-## PCE / real-level sampling
+## Sampling/PCE checkpoint
 
-Authoritative `Pieces/` count is 29 (an earlier spoken 27 was corrected). Direct reads cover most relevant ordinary/expansion cases, including:
-- ordinary: brick, coin, convert, double, doubleslit, filter, mine, mirror, oneway, polarizer, prism, refractor, source, splitter, threeway, tnt, wood;
-- exp1: blackhole, complex, prismirror, selector, spaceship;
-- exp2: water;
-- `convert.pce` is ordinary despite indices 260..267, proving index magnitude does not imply atlas family.
+Authoritative PCE count 29 (earlier spoken 27 corrected). Direct reads cover most ordinary/expansion cases. `convert.pce` is ordinary despite indices 260..267; `water.pce` is explicit exp2. Level_001 from all four LP1 skill groups matched PCE sequences against `render-map.csv`; ordinary and expansion pieces coexist as expected. Selector **piece** token `I` is correctly exp1 and is not the current failure.
 
-Sampled `Level_001` from every LP1 skill group and matched characteristic PCE sequences to `render-map.csv`; ordinary and explicit expansion pieces coexist exactly as expected. Selector **piece** token `I` is correctly exp1 and is not the current failure.
+## Concrete failing case — LP1 SELECTOR
 
-## Concrete failing case — LP1 `SELECTOR`
+User screenshot: outer board border shows repeated green connector/node graphics; title-area frame is correct via another path; interior pieces mostly coherent.
 
-User supplied a screenshot showing:
-- outer board border rendered as repeated green connector/node-like graphics;
-- title-area frame rendered correctly by a different path;
-- interior pieces otherwise coherent.
-
-Exact map located:
+Exact map:
 ```text
 Aargon Deluxe Collectors Edition 1.4.CE/Level Packs/Level Pack 1/
 Levels/Skill1/Level_002.map
@@ -89,140 +69,135 @@ MAPTEXT:[SELECTOR]
 blob 1cd45a781fee5a0f9e19263a8dd84fbd3d9bd27e
 ```
 
-The map parser (`MapFile.parse`) decodes each 4-character cell as:
-```text
-[0] token
-[1] decimal rotation (blank -> 0)
-[2] BeamColor token / meta
-[3] mutability token
-```
-`BeamColor.fromToken` maps an unrecognized/blank color to `BLACK`; `X` maps to `WHITE`.
+`MapFile.parse` decodes each 4-char cell as token / decimal rotation / BeamColor(meta) / mutability. Blank color -> BLACK; `X` -> WHITE.
 
-SELECTOR's ordinary outer frame uses blank meta, e.g.:
+Normal outer frame uses blank meta:
 ```text
-=3 n   top-left
-=4 n   top edge
-=5 n   top-right
-=2 n   left edge
-=6 n   right edge
-=1 n   bottom-left
-=  n   bottom edge (blank rotation -> 0)
-=7 n   bottom-right
+=3 n top-left      =4 n top       =5 n top-right
+=2 n left                           =6 n right
+=1 n bottom-left   =  n bottom    =7 n bottom-right
 ```
-Two special separator cells use `X/WHITE`, including `=2Xn` and `=1Xn`.
+Special separator cells include `=2Xn`, `=1Xn`.
 
-This establishes the oriented legacy rotation semantics for the normal rectangle:
+Legacy oriented rotation meaning established for this frame:
 ```text
-0 bottom horizontal / interior north
-1 bottom-left corner / interior NE
-2 left vertical / interior east
-3 top-left corner / interior SE
-4 top horizontal / interior south
-5 top-right corner / interior SW
-6 right vertical / interior west
-7 bottom-right corner / interior NW
+0 bottom edge (interior N)
+1 bottom-left corner (NE)
+2 left edge (E)
+3 top-left corner (SE)
+4 top edge (S)
+5 top-right corner (SW)
+6 right edge (W)
+7 bottom-right corner (NW)
 ```
 
-Important architectural correction: plain `WallTopology` connectivity alone is insufficient for an asymmetric frame. Left/right both have N+S connectivity and top/bottom both have E+W. Canonical border state therefore needs an **oriented edge/corner role** (or topology plus facing), not only an N/E/S/W mask. Legacy rotation may be translated into those semantic names inside the compatibility layer, but styles should not consume the number.
+Plain `WallTopology` alone is insufficient for asymmetric framing: left/right share N+S connectivity, top/bottom share E+W. Canonical state therefore needs oriented edge/corner role (or topology+facing). Legacy numeric rotation may be translated at the compatibility boundary but must not leak to styles.
 
-## Root cause reproduced from data
+## Root cause reproduced
 
-`PieceRegistry` maps legacy token `=` to canonical piece id `border` / `PieceBorder`.
+Legacy token `=` resolves to canonical `border` / `PieceBorder`.
 
-Current non-BASE `PieceBorder` path in `PieceVisualCatalog` delegates to `LegacyRenderResolver` with raw token, stored rotation and meta.
+Before the new migration patch, non-BASE `PieceBorder` in `PieceVisualCatalog` was delegated to `LegacyRenderResolver` with raw rotation/meta.
 
-`LegacyRenderResolver` maps OpenAargon BLACK meta to PCE color row 0. In `wood.pce` / `render-map.csv`, token `=` has:
+`LegacyRenderResolver`: OA BLACK -> PCE color row 0. `wood.pce`/`render-map.csv` token `=`:
 ```text
-PCE color rows 0..6: rotations -> 5,6,5,6,5,6,5,6
-PCE color row 7:    rotations -> 79,59,97,117,118,58,98,78
+PCE rows 0..6 -> 5,6,5,6,5,6,5,6
+PCE row 7     -> 79,59,97,117,118,58,98,78
 ```
 
-Therefore SELECTOR's normal blank-meta outer border **necessarily resolves to repeated tile 5/6** in the current LP1 legacy path. This exactly matches the repeated connector/node appearance in the screenshot. This is now a reproduced data-flow root cause, not a visual guess.
+Thus SELECTOR blank-meta outer frame necessarily became repeating 5/6 under LP1, matching the screenshot. `X/WHITE` reaches row 7. This is a reproduced data-flow cause, not a visual guess.
 
-The special `X/WHITE` cells map to PCE color row 7 instead, explaining why the data can reach the distinct 8-slot set only for those cells.
+Do **not** fix it by globally remapping LP1 `wood`: board border is a canonical PieceBorder concept and should not use generic PCE wood lookup.
 
-Do not fix this by globally rewriting LP1 wood rows: board border is a canonical `PieceBorder` concept in OpenAargon and should leave generic PCE wood lookup.
+## Native normalized border evidence
 
-## Native OpenAargon border path — strong regression evidence
+`texture/border.png` is 256x64 = 8x2 32px variants.
 
-`src/main/resources/texture/border.png` is 256x64: exactly 8 columns x 2 rows of 32px variants.
+Path history shows it existed in 2016 initial commit `0d8b1ec...`; initial `PieceBorder` already rendered from it outside PCE/black_tiles. By `d1fbfdcd7f5fb3f57bec8ef04c4751187671d384` (`Piece movement`) offset was `rot*32`, row `(meta==6 ? 0 : 32)`. Current PieceBorder still uses the normalized sheet plus topology T-junction corrections.
 
-History check:
-- `border.png` already existed in the original 2016 repository (`0d8b1ec...`, initial commit).
-- Initial `PieceBorder` already rendered from `texture/border.png`, entirely outside `black_tiles`/PCE.
-- Commit `d1fbfdcd7f5fb3f57bec8ef04c4751187671d384` (`Piece movement`, 2016) used:
-  `new IntVector(rot * 32, (meta == 6) ? 0 : 32)`.
-- Current `PieceBorder` retains this 8x2 native-sheet concept and additionally has topology-aware T-junction normalization.
+Therefore routing non-BASE borders into generic legacy atlases was a later architectural regression relative to OpenAargon's long-standing normalized border model.
 
-So redirecting non-BASE `PieceBorder` into generic legacy atlas lookup is a later regression relative to OpenAargon's long-standing normalized border resource model.
+## Current semantic-border implementation
 
-## Current architecture
+### New `BorderVisualVariant`
 
-`GameField` already routes placed visuals through `PieceVisualCatalog.resolve(instance, boardStyle)` and already has cell coordinate `c` while rendering.
+Commit `4fcdb9faa009652e1a206a264920b2fc29d2973c` added `render/visual/BorderVisualVariant.java`.
 
-`PieceVisualCatalog` is intended as canonical visual façade but is transitional. It currently delegates `PieceWall`, `PieceLegacyStub`, and non-BASE `PieceBorder` to `LegacyRenderResolver`. The `PieceBorder` case is the problem.
-
-`WallTopology` already models renderer-independent N/E/S/W connectivity and explicitly warns that CE rotation values are not universally reliable topology. `PieceBorder` exposes topology helpers and native border rendering logic.
-
-There is currently no `src/test` suite and `pom.xml` has no test framework dependency. Do not add an entire framework just for this migration; prefer small pure semantic mapping logic plus compile/runtime validation.
-
-The correct title-frame codepath has not yet been conclusively identified. Searches for Title/frame/border/render calls were inconclusive because repository indexing is unreliable. It is useful reference evidence but no longer blocks the border fix because the failure is reproduced independently.
-
-## Migration design for this case
-
-1. Introduce a canonical oriented border variant (edge/corner/facing), not raw rotation.
-2. Derive it from board context/topology where unambiguous; use legacy rotation only inside the compatibility translation where orientation cannot be recovered from connectivity alone.
-3. Make `PieceVisualCatalog` accept enough board context (`IGameField`, coords) for border semantic resolution.
-4. Route `PieceBorder` through a border-specific semantic visual resolver for **all styles**, not generic `LegacyRenderResolver`.
-5. Initially use the normalized native `border.png` resource as the canonical border sheet unless a verified style-specific border resource is added; this deliberately removes the failing dependency on LP1 `black_tiles`.
-6. Keep style-specific border override capability behind the semantic variant API so future LP1/HD/custom themes can supply arbitrary resources without changing map/PCE semantics.
-7. Do not add global `styles/lp1.csv` wood/border overrides.
-
-## Action log
-
-- Corrected repo owner and established `Mateozaur/OpenAargon` / `linux-modernization`.
-- Inventoried CE assets, LP1 PACK.INI, shared/pack-local sheets, sibling packs, PCEs and levels.
-- Local clone attempt failed DNS; no usable local checkout.
-- Verified LP1-LP4 ordinary-sheet convention and LP1 lack of expansion replacements.
-- Classified PCE ordinary/expansion cases and corrected PCE count to 29.
-- Verified representative LP1 maps across all four skills against PCE/render-map data.
-- Used base64 binary ranges to confirm BMP headers and resolve LP3 +2-byte tail anomaly.
-- Established high-confidence no-global-LP1-remap historical conclusion.
-- User supplied SELECTOR screenshot and clarified universal semantic-rendering goal.
-- Read `LegacyRenderResolver`, `GameField`, `PieceVisualCatalog`, `PieceBorder`, `WallTopology`, `PieceInstance`, `VisualStyleId`, `SpriteDefinition`, `MapFile`, `BeamColor`, `PieceRegistry`, and `pom.xml`.
-- Found no existing `src/test` framework.
-- Identified non-BASE PieceBorder -> generic LegacyRenderResolver bypass as primary suspect.
-- Three accidental no-op `update_ref` calls earlier targeted unchanged HEAD; no content/history changed.
-- Tree/code searches for title-frame renderer remained inconclusive and are not treated as absence evidence.
-- Exact SELECTOR map found at Skill1/Level_002; parsed its border rotations/meta.
-- Confirmed blank map meta -> BLACK and X -> WHITE.
-- Confirmed `render-map.csv` token 61 / `wood` rows: PCE colors 0..6 -> repeating 5/6; color 7 -> eight distinct indices.
-- Reproduced screenshot failure from current resolver data flow: normal SELECTOR border blank meta -> PCE row 0 -> repeated 5/6.
-- Confirmed native `border.png` is 256x64 (8x2) and dates to the 2016 initial repo; `PieceBorder` historically rendered from it outside PCE/black_tiles.
-- Commit search for generic "border" was again unreliable/empty; direct path history API successfully found initial/Piece movement history.
-- No functional code or `styles/lp1.csv` rows have been changed yet at this checkpoint.
-
-## Recovery-note checkpoints
-
+Canonical roles:
 ```text
-49fa9e30  Finalize LP1 recovery handoff checkpoint
-ee91c454  Record LP1 provenance and BMP header validation
-c6284f19  Record LP3 header check and cross-skill LP1 sampling
-a2ea732b  Finalize LP1 cross-skill recovery checkpoint
-8d640596  Record semantic rendering migration checkpoint
-a2561ddc  Record semantic-border investigation progress
+BOTTOM_EDGE, BOTTOM_LEFT_CORNER, LEFT_EDGE, TOP_LEFT_CORNER,
+TOP_EDGE, TOP_RIGHT_CORNER, RIGHT_EDGE, BOTTOM_RIGHT_CORNER,
+TEE_SOUTH, TEE_NORTH
 ```
+
+`fromLegacyRotation()` is explicitly a compatibility translation. Each role currently has a default `border.png` column; T-junction semantic roles alias the historical native columns 4/5. Styles may later map the semantic enum to arbitrary resources.
+
+### `PieceBorder`
+
+Commit `c3c25636922af662426a3f9fdb6c97d06e05991d` added `getVisualVariant(field, coords, legacyRotation)`.
+
+- Legacy 0..7 is immediately translated to named semantic role.
+- Board topology wins for W+E+S (`TEE_SOUTH`) and W+E+N (`TEE_NORTH`).
+- Existing `getRenderRotation()` remains only as compatibility accessor returning default native column.
+- Native `getTextureOffset()` now consumes the semantic variant.
+
+### `PieceVisualCatalog`
+
+Commit `297dded77df24569bca17eec6fc824287d8b6b7d` removes `PieceBorder` from the generic `LegacyRenderResolver` decision.
+
+New context-aware overload:
+```text
+resolve(PieceInstance, VisualStyleId, IGameField, IntVector coords)
+```
+The old overload remains and delegates with null context.
+
+For PieceBorder the catalog now:
+- asks PieceBorder for `BorderVisualVariant`;
+- preserves semantic WHITE/X vs ordinary meta as the two normalized rows;
+- returns `texture/border.png` + semantic default column;
+- intentionally ignores style for now as a canonical baseline.
+
+This is deliberate: **all styles stop depending on `black_tiles` for board border immediately**. Future LP1/HD/custom border art should override semantic variants in the catalog/data registry, not reintroduce PCE tile numbers.
+
+`PieceWall` and `PieceLegacyStub` still use the CE legacy resolver and are separate future migrations.
+
+## GameField status
+
+`GameField` already has `PieceInstance` + cell coordinate `c` during rendering. It still calls the old two-argument `PieceVisualCatalog.resolve(instance, boardStyle)` at this checkpoint. Next functional edit must pass `this, c` to activate topology-aware border resolution in the canonical catalog.
+
+## Tests/build
+
+No `src/test` suite and no test framework dependency in `pom.xml`. Do not add a framework solely for this migration. Validate by source consistency/build where available and user runtime test. Title-frame codepath remains unambiguously unidentified; it no longer blocks the fix because root cause is independently reproduced.
+
+## Action log (material actions)
+
+- Recovered repo/branch, inventoried CE assets/PCE/maps, documented tool limitations.
+- Proved original LP1 index preservation and no-global-remap rule.
+- Confirmed BMP geometry and LP3 tail anomaly via base64 binary ranges.
+- Sampled LP1 levels/PCE/render-map across all four skill groups.
+- User supplied SELECTOR screenshot and clarified universal semantic-rendering target.
+- Reviewed LegacyRenderResolver, GameField, PieceVisualCatalog, PieceBorder, WallTopology, PieceInstance, VisualStyleId, SpriteDefinition, MapFile, BeamColor, PieceRegistry, pom.xml.
+- No existing test suite found.
+- Located exact SELECTOR map and decoded border state.
+- Reproduced failure: blank meta -> BLACK -> PCE row0 -> repeated 5/6.
+- Verified native border.png 8x2 and 2016 history outside PCE.
+- Commit search remained unreliable; direct path history API succeeded.
+- Added semantic enum (`4fcdb9fa`).
+- Refactored PieceBorder semantic translation (`c3c25636`).
+- Removed PieceBorder from generic legacy resolver and added context-aware catalog API (`297dded7`).
+- No `styles/lp1.csv` rows changed.
+
+Earlier note checkpoints include `49fa9e30`, `ee91c454`, `c6284f19`, `a2ea732b`, `8d640596`, `a2561ddc`, `f8e6bfd3`.
 
 ## Resume here
 
-Root cause for LP1 SELECTOR outer-border regression is now reproduced. Continue with the **functional semantic border migration**:
+1. Update `GameField.bufferRenders` to call `PieceVisualCatalog.resolve(instance, boardStyle, this, c)`.
+2. Inspect resulting source/import consistency; remove unused imports only if needed.
+3. Search for all `PieceVisualCatalog.resolve` callers and ensure compatibility.
+4. Validate branch/build if possible.
+5. Update this note with validation result.
+6. User runtime-test LP1 SELECTOR: ordinary outer border should stop showing repeated LP1 atlas tile 5/6. Verify both normal blank-meta frame and `X/WHITE` separator cells.
+7. If geometry is correct but art is not LP1-themed, add style-specific border art **by `BorderVisualVariant`**, not by raw PCE indices.
 
-1. Re-fetch latest `PieceVisualCatalog`, `GameField`, `PieceBorder` before editing.
-2. Add canonical oriented border variant type/translation.
-3. Add context-aware PieceVisualCatalog resolution and have GameField pass board+coords.
-4. Remove non-BASE PieceBorder from generic LegacyRenderResolver path.
-5. Resolve PieceBorder through semantic variant to normalized `texture/border.png` first; preserve an explicit extension point for style-specific semantic overrides.
-6. Compile/check code paths; no new test framework solely for this patch.
-7. User should validate LP1 SELECTOR runtime screenshot after build.
-
-Do not solve SELECTOR by globally remapping LP1 `wood`/token `=` in `styles/lp1.csv`.
+Repository: `Mateozaur/OpenAargon`  
+Branch: `linux-modernization`
