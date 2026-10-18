@@ -2,41 +2,33 @@
 
 _Last updated: 2026-10-18_
 
-Hand-off / live recovery state for the Collector's Edition Level Pack 1 (LP1) legacy-rendering investigation.
+Live hand-off state for the Collector's Edition Level Pack 1 (LP1) legacy-rendering investigation.
 
 ## Safety rule
 
-Do **not** add rows to `src/main/resources/legacy/styles/lp1.csv` from visual guesses, equal atlas dimensions, or unvalidated binary hypotheses. An override must be supported by concrete original-asset evidence or a validated index-preservation method.
+Do **not** add rows to `src/main/resources/legacy/styles/lp1.csv` from visual guesses, equal dimensions, or unvalidated binary hypotheses. An override needs concrete original-asset evidence or a validated index-preservation method.
 
-## Confirmed rendering model
+## Confirmed model
 
-- `src/main/resources/legacy/render-map.csv` is the shared mapping; style CSVs such as `styles/lp1.csv` are sparse overrides.
-- Generic `atlas=base` is rendered from the currently selected legacy style atlas. `atlas=exp1` and `atlas=exp2` remain shared expansion atlases.
-- `LegacyTileSet.BASE` and `LegacyTileSet.LEVEL_PACK_1` are both 20x15; equal dimensions alone do not prove semantic index equality.
-- Original `Pieces/*.pce` picture tables are authoritative sources for piece render indices. `brick.pce` was previously checked against `render-map.csv`.
-- The LP1 pack directory has no alternate `Pieces/*.pce` corpus. The open question is whether its own ordinary tile sheet preserves the shared PCE index layout.
+- `src/main/resources/legacy/render-map.csv` is the shared mapping; style CSVs are sparse overrides.
+- Generic `atlas=base` uses the currently selected legacy style atlas; `exp1` / `exp2` remain shared expansion atlases.
+- `LegacyTileSet.BASE` and `LEVEL_PACK_1` are both 20x15, but dimensions alone do not prove semantic slot equality.
+- Original `Pieces/*.pce` picture tables are authoritative sources for piece render indices.
+- LP1 has no alternate `Pieces/*.pce` corpus; the key question is whether its ordinary sheet preserves shared-PCE slot semantics.
 
-## Resolved branches — do not redo first
+## Resolved — do not redo first
 
 ### Selector (`I`, token 73)
 
-`Pieces/selector.pce` explicitly uses:
+`Pieces/selector.pce` explicitly uses `black_tiles_exp1.bmp` / `black_tiles_small_exp1.bmp`. Its picture values and offsets reproduce the existing Selector rows in `render-map.csv` under `atlas=exp1`. Selector stays on shared exp1 and needs no LP1 override.
 
-```ini
-TILESFILE=black_tiles_exp1.bmp
-SmallTILESFILE=black_tiles_small_exp1.bmp
-TOKEN  = I
-```
+### LP1 skill / downstream DLLs
 
-Its picture values/offsets reproduce the existing Selector rows in `render-map.csv` under `atlas=exp1`. Selector therefore stays on shared `exp1` and must not get LP1 overrides.
-
-### LP1 skill DLL / downstream DLLs
-
-`PACK.INI` contains `SelectSkillDll=LevelPackOne`; reverse engineering of `RELEASE_LevelPackOne.dll` established that it implements LP1 skill/level-selection UI, not token-to-sprite mapping. `RELEASE_ItemMap.dll::MAP::SelectTile(CPosition)` and `RELEASE_TileBlitter.dll` are also not mapping sources.
+`RELEASE_LevelPackOne.dll` implements LP1 skill/level-selection UI, not token-to-sprite mapping. `RELEASE_ItemMap.dll::MAP::SelectTile(CPosition)` and `RELEASE_TileBlitter.dll` are also not mapping sources.
 
 ## Atlas provenance checkpoint
 
-Commit `2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8` introduced Collector's Edition legacy rendering and `base.png`, `lp1.png`, `lp2.png`, `lp3.png`, `lp4.png`, `classic.png`, `hotter.png`, `pocket.png`, `exp1.png`, and `exp2.png`, but did not document a conversion script/source-BMP provenance.
+Commit `2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8` introduced Collector's Edition legacy rendering plus `base.png`, `lp1.png`, `lp2.png`, `lp3.png`, `lp4.png`, `classic.png`, `hotter.png`, `pocket.png`, `exp1.png`, `exp2.png`; no conversion script/source-BMP provenance was documented there.
 
 Known blobs:
 
@@ -45,46 +37,50 @@ base.png  e1e903a202b7d8c301f46cfa12291abe4a383ae4  ~320631 bytes
 lp1.png   87ab0fe3c09e2e26dca009d21e50791cfa1e3570  ~340425 bytes
 ```
 
-## New confirmed LP1 asset evidence — 2026-10-18
+## Original tile-sheet evidence
 
-The tracked original Collector's Edition tree is present directly in the repository under `Aargon Deluxe Collectors Edition 1.4.CE/` (plus the ZIP at repository root).
+Tracked CE tree: `Aargon Deluxe Collectors Edition 1.4.CE/`.
 
-The LP1 pack is:
-
-```text
-Aargon Deluxe Collectors Edition 1.4.CE/Level Packs/Level Pack 1/
-```
-
-Its root contains `Levels/`, `PACK.INI`, `Pictures/`, and `Sounds/`.
-
-LP1's own `Pictures/` directory contains pack-local files with the ordinary logical tile-sheet names:
+Shared/root sheets:
 
 ```text
-Aargon Deluxe Collectors Edition 1.4.CE/Level Packs/Level Pack 1/Pictures/black_tiles.bmp
-  blob: 768d05581ab0a2a39beb9e29c492e869d07eb2fe
-  size: 921654 bytes
-
-Aargon Deluxe Collectors Edition 1.4.CE/Level Packs/Level Pack 1/Pictures/black_tiles_small.bmp
-  blob: e27ac267529a3f56020508c07775414f114a4032
-  size: 57654 bytes
+Pictures/black_tiles.bmp                 921654  2c1cebca0a437c2080352e48425150d3c374a533
+Pictures/black_tiles_exp1.bmp            491576  adc86dffc884c39574c46bd1f7cbf329378be876
+Pictures/black_tiles_exp2.bmp             24630  777e69561f964de3d335225b0d244b7c27b4e26b
+Pictures/black_tiles_small.bmp            57654  f12083c95843dd58ee66f42dd5fe8569732d0a61
+Pictures/black_tiles_small_exp1.bmp       30776  d6259db4d766c373db8d86c6851a0bbef84ef24d
+Pictures/black_tiles_small_exp2.bmp        1590  f0df8506a8e4515c6c1ce53ce8dd7b0373bf44d3
 ```
 
-An explicit search of the LP1 `Pictures/` inventory for `black_tiles_exp` returned no matches. LP1 therefore overrides the ordinary pair only; it does not supply pack-local `exp1`/`exp2` tile sheets. This supports the renderer model in which the current style supplies `base`, while `exp1` and `exp2` remain shared atlases.
-
-The shared/root `Pictures/` directory contains the complete ordinary/expansion tile-sheet family:
+LP1 pack-local ordinary sheets:
 
 ```text
-black_tiles.bmp                 921654 bytes  2c1cebca0a437c2080352e48425150d3c374a533
-black_tiles_exp1.bmp            491576 bytes  adc86dffc884c39574c46bd1f7cbf329378be876
-black_tiles_exp2.bmp             24630 bytes  777e69561f964de3d335225b0d244b7c27b4e26b
-black_tiles_small.bmp            57654 bytes  f12083c95843dd58ee66f42dd5fe8569732d0a61
-black_tiles_small_exp1.bmp       30776 bytes  d6259db4d766c373db8d86c6851a0bbef84ef24d
-black_tiles_small_exp2.bmp        1590 bytes  f0df8506a8e4515c6c1ce53ce8dd7b0373bf44d3
+Level Packs/Level Pack 1/Pictures/black_tiles.bmp
+  921654 bytes  768d05581ab0a2a39beb9e29c492e869d07eb2fe
+Level Packs/Level Pack 1/Pictures/black_tiles_small.bmp
+   57654 bytes  e27ac267529a3f56020508c07775414f114a4032
 ```
 
-The LP1 ordinary sheets have **exactly the same byte sizes** as the corresponding shared/base ordinary sheets while having **different blob identities**. This is strong structural evidence that LP1 replaces visual content while retaining the same BMP dimensions/format footprint and grid capacity. It is not yet proof that every tile slot keeps the same semantic meaning.
+LP1 contains no `black_tiles_exp*` files. Thus LP1 overrides only the ordinary pair; exp1/exp2 remain shared.
 
-### LP1 PACK.INI exact content
+LP1 ordinary sheets exactly match base ordinary sheets in byte size but differ in blob identity. This is strong structural evidence for same-shape content replacement, but not yet proof of semantic slot preservation.
+
+### Repeated pack-local convention
+
+Level Pack 2 also contains the same ordinary filenames in its own `Pictures/` directory:
+
+```text
+Level Packs/Level Pack 2/Pictures/black_tiles.bmp
+  921654 bytes  1c049d0baf5de562518ac4df894dc2bb5be7c4b4
+Level Packs/Level Pack 2/Pictures/black_tiles_small.bmp
+   57654 bytes  fb9fd458550f87cc3696e980277813b9bf10e809
+```
+
+These sizes again exactly match the shared/base ordinary sheets while the blobs differ. The repeated directory/name/size pattern across LP1 and LP2 is strong evidence that same-named pack-local ordinary tile sheets are an intentional level-pack resource convention, not an LP1 accident. It still does not alone prove lookup precedence or semantic slot identity.
+
+## LP1 PACK.INI
+
+Exact content:
 
 ```ini
 [Params]
@@ -95,102 +91,79 @@ SelectSkillDll=LevelPackOne
 IsEmpty=false
 ```
 
-`PACK.INI` contains no tile filename, `Pictures` path, atlas name, or resource-search-path setting. Therefore the LP1 `black_tiles.bmp` selection is not configured explicitly in `PACK.INI`; any shadowing must come from general active-pack resource lookup.
+No tile filename, `Pictures` path, atlas name, or resource-search-path field exists. Pack-local ordinary-sheet selection therefore is not explicitly configured in `PACK.INI`; any shadowing must come from general active-pack resource lookup.
 
 ## PCE inventory checkpoint
 
-The authoritative shared `Pieces/` directory listing contains **29** `.pce` files:
+Authoritative `Pieces/` listing contains 29 `.pce` files (an earlier spoken count of 27 was wrong and was corrected):
 
 ```text
-blackhole.pce blank.pce brick.pce coin.pce complex.pce convert.pce
-double.pce doubleslit.pce explosion.pce filter.pce fuelcell.pce lbender.pce
-mine.pce mirror.pce oneway.pce polarizer.pce prism.pce prismirror.pce
-refractor.pce selector.pce slime.pce source.pce spaceship.pce splicer.pce
-splitter.pce threeway.pce tnt.pce water.pce wood.pce
+blackhole blank brick coin complex convert double doubleslit explosion filter
+fuelcell lbender mine mirror oneway polarizer prism prismirror refractor selector
+slime source spaceship splicer splitter threeway tnt water wood
 ```
 
-The earlier spoken count of 27 was wrong; it has been corrected to 29 from the enumerated list.
-
-A repository code-search query for `TILESFILE` scoped to this directory returned zero results. This is an indexing/search limitation and is not evidence that declarations are absent. Files are being read directly instead.
-
-`blank.pce` contains the PCE format documentation and establishes these defaults when a piece omits the flags:
+`blank.pce` documents defaults:
 
 ```text
 TilesFile default:      black_tiles.bmp
 SmallTilesFile default: black_tiles_small.bmp
 ```
 
-Direct inventory progress:
+Direct reads so far:
 
 ```text
-blackhole.pce   explicit exp1: black_tiles_exp1.bmp / black_tiles_small_exp1.bmp
-blank.pce       no explicit override; documents ordinary defaults above
-brick.pce       no explicit TilesFile/SmallTilesFile -> ordinary defaults
-coin.pce        no explicit TilesFile/SmallTilesFile -> ordinary defaults
-complex.pce     explicit exp1: black_tiles_exp1.bmp / black_tiles_small_exp1.bmp
-convert.pce     no explicit TilesFile/SmallTilesFile -> ordinary defaults
-double.pce      no explicit TilesFile/SmallTilesFile -> ordinary defaults
-doubleslit.pce  no explicit TilesFile/SmallTilesFile -> ordinary defaults
-explosion.pce   no [FLAGS] section and no explicit tile-file choice; keep unclassified rather than infer beyond the file
+blackhole.pce   explicit exp1
+blank.pce       format/default documentation
+brick.pce       ordinary/default
+coin.pce        ordinary/default
+complex.pce     explicit exp1
+convert.pce     ordinary/default (indices 260..267 prove index magnitude does not identify atlas)
+double.pce      ordinary/default
+doubleslit.pce  ordinary/default
+explosion.pce   animation list only; no [FLAGS], intentionally unclassified
 ```
 
-Thus omission of `TilesFile` **inside a normal `[FLAGS]` definition** is positive evidence for use of the ordinary `black_tiles.bmp`, not an unknown value. `explosion.pce` is treated separately because it contains only an animation list and no `[FLAGS]` section. Also, picture-number magnitude cannot classify the atlas: `convert.pce` uses ordinary defaults while its picture table contains indices `260..267`.
+GitHub code search for `TILESFILE` returned zero indexed results despite direct proof that the declarations exist, so direct file reads are authoritative.
 
 ## Current open questions
 
-1. What general loader/search-path code makes pack-local `Pictures/black_tiles.bmp` shadow the shared/base sheet?
-2. Complete the remaining 20 direct `.pce` reads and classify each as ordinary/default, exp1, exp2, or non-piece/helper where appropriate.
-3. Do LP1 `black_tiles.bmp` tile slots preserve the semantic ordering expected by shared PCE picture indices?
-4. Does OpenAargon's `lp1.png` correspond directly to LP1's pack-local `black_tiles.bmp`, with ordering preserved?
+1. What general loader/search-path behavior makes active-pack `Pictures/black_tiles.bmp` shadow the shared/base sheet?
+2. Do Level Packs 3 and 4 repeat the LP1/LP2 same-named ordinary-sheet convention?
+3. Complete remaining direct `.pce` classifications.
+4. Do LP1 ordinary tile slots preserve the semantic ordering expected by shared PCE picture indices?
+5. Does OpenAargon's `lp1.png` directly correspond to LP1's pack-local `black_tiles.bmp` with coordinates/order preserved?
 
-## Next validation steps
+## Action log — 2026-10-18
 
-1. Check whether other original Level Packs also contain same-named pack-local `Pictures/black_tiles.bmp` / `black_tiles_small.bmp`; repeated structure would be strong evidence for intentional active-pack shadowing.
-2. Continue direct `.pce` reads in batches and record each batch before proceeding.
-3. Trace original resource/search-path behavior from configuration/code/assets; `PACK.INI` itself has now been ruled out as the place where tile lookup is configured.
-4. Correlate LP1 BMP with OpenAargon `lp1.png`; only if provenance is insufficient, compare cells on the 20x15 grid against PCE indices.
-5. Add `styles/lp1.csv` rows only for verified deviations. If slot semantics are preserved, the correct result may be no additional LP1 overrides.
-
-## Existing relevant commits
-
-```text
-056778dc07aa42ea0d5b5bbe56364a03e74917f1  document Selector/exp1 in lp1.csv
-6b1c90915b550a5d86babf5e01ab2a98eceb8c94  document Selector evidence in styles README
-b21842799933df839472c8dd81fae84adc0c824e  create initial recovery notes
-78586c5aef6c8d05d5560ce92fe3258bd3edc6ba  link recovery notes from root README
-2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8  add Collector's Edition legacy rendering support
-```
-
-## Investigation action log — 2026-10-18
-
-- Resumed `linux-modernization` and read this note before touching mappings/code.
-- Corrected an initial guessed repository owner: the working repo is `Mateozaur/OpenAargon`; the `OpenAargon/OpenAargon` probe returned 404 and changed nothing.
-- Requested the Collector's Edition root via GitHub contents API.
-- Read `linux-modernization` branch metadata and recursively inspected the tree at checkpoint commit `5c39b456e2a2b0b77ac255504ffbb82d849b42bf`.
-- Searched that tree for `black_tiles`, `PACK.INI`, and `Pieces/` paths.
-- Attempted a shallow local clone into `/mnt/data/OpenAargon` for deterministic `find`/`rg`; it failed before checkout because the execution environment could not resolve `github.com`. No project files were modified by that attempt.
-- Switched back to the connected GitHub API.
-- Enumerated CE root, `Level Packs/`, LP1 root, shared `Pieces/`, LP1 `Pictures/`, and shared/root `Pictures/`.
-- Confirmed LP1 contains pack-local ordinary `black_tiles.bmp` / `black_tiles_small.bmp`, equal in byte size but different in blob identity from the shared ordinary pair.
-- Confirmed LP1 contains no `black_tiles_exp*` files; expansion sheets remain shared.
-- Fetched LP1 `PACK.INI`; confirmed it contains no picture/tile/search-path configuration.
-- Retrieved the authoritative `Pieces/` directory listing. Corrected preliminary count from 27 to 29 after recounting the enumerated names.
-- Ran GitHub repository code search for `TILESFILE` scoped to the CE `Pieces` directory; it returned zero results and was classified as a search-index limitation.
-- Directly fetched first PCE batch: `blackhole.pce`, `blank.pce`, `brick.pce`; recorded `blackhole=exp1`, the documented ordinary defaults, and `brick=ordinary/default`.
-- Directly fetched second PCE batch: `coin.pce`, `complex.pce`, `convert.pce`; recorded `coin=ordinary/default`, `complex=exp1`, `convert=ordinary/default`.
-- Noted that `convert.pce` has indices `260..267` despite using the ordinary default atlas, so tile-number ranges alone must not be used to infer atlas family.
-- Directly fetched third PCE batch: `double.pce`, `doubleslit.pce`, `explosion.pce`; recorded `double` and `doubleslit` as ordinary/default and `explosion` as having no `[FLAGS]` / no explicit atlas selection.
-- Searched repository code for the literal `Level Packs`; zero indexed source results were returned.
-- Searched repository code for `LevelPack`; zero indexed source results were returned.
-- The earlier recursive-tree scan was also probed for `LevelPack`; it did not yield actionable loader source evidence. These negative search results are treated as indexing/source-availability limits, not proof that the original executable lacks active-pack lookup logic.
+- Resumed `linux-modernization`; read this note before touching mappings/code.
+- Corrected initial bad repo owner probe (`OpenAargon/OpenAargon` -> 404); correct repo is `Mateozaur/OpenAargon`.
+- Read branch metadata and recursive tree; searched tree for `black_tiles`, `PACK.INI`, and `Pieces/`.
+- Attempted shallow local clone into `/mnt/data/OpenAargon`; failed before checkout because environment could not resolve `github.com`; no project state changed.
+- Switched back to connected GitHub API.
+- Enumerated CE root, `Level Packs/`, LP1 root, shared `Pieces/`, LP1 `Pictures/`, shared/root `Pictures/`.
+- Confirmed LP1 pack-local ordinary sheets; confirmed no LP1 `black_tiles_exp*`.
+- Fetched LP1 `PACK.INI`; ruled it out as explicit tile/search-path configuration.
+- Recorded all six shared ordinary/expansion tile-sheet files with blobs/sizes.
+- Compared LP1 ordinary sheets with base: same sizes, different blobs.
+- Retrieved authoritative `Pieces/` listing; corrected count from 27 to 29.
+- Ran indexed `TILESFILE` search; zero results, treated as indexing limitation.
+- Direct-read PCE batch 1: `blackhole`, `blank`, `brick`.
+- Direct-read PCE batch 2: `coin`, `complex`, `convert`.
+- Direct-read PCE batch 3: `double`, `doubleslit`, `explosion`.
+- Searched repo code for `Level Packs` and `LevelPack`; both returned zero indexed source results.
+- Probed earlier recursive tree for `LevelPack`; no actionable loader-source evidence found.
+- Re-enumerated `Level Packs/` to identify sibling packs for structural comparison.
+- Enumerated `Level Pack 2/Pictures/` and searched returned inventory for `black_tiles`.
+- Confirmed LP2 also supplies pack-local `black_tiles.bmp` (921654 bytes, blob `1c049d0b...`) and `black_tiles_small.bmp` (57654 bytes, blob `fb9fd458...`).
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
-- Next action: enumerate `Pictures/` for the other original Level Packs and test whether the same ordinary tile-sheet filenames recur pack-locally.
 
 ## Resume here
 
-LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. Direct PCE inventory has read 9/29 files. Literal code searches have not exposed active-pack lookup source. Next, test the repeated directory convention across other Level Packs; then continue PCE inventory and semantic slot validation.
+The strongest new evidence is now architectural: LP1 and LP2 both ship same-named ordinary tile sheets in pack-local `Pictures/`, with exactly the shared/base sizes but distinct content blobs, while LP1 does not override expansion sheets. Next check LP3/LP4 for the same convention, then continue PCE inventory and semantic slot validation. Do not add LP1 mapping overrides until a deviation is proven.
 
 ```text
 Repository: Mateozaur/OpenAargon
 Branch: linux-modernization
+Latest notes commit before LP3/LP4 check: ca3904958749b55685d7cbf1e2d18d7e74b422bc
 ```
