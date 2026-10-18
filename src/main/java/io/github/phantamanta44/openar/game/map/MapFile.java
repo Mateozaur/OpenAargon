@@ -2,7 +2,7 @@ package io.github.phantamanta44.openar.game.map;
 
 import io.github.phantamanta44.openar.Aargon;
 import io.github.phantamanta44.openar.game.beam.BeamColor;
-import io.github.phantamanta44.openar.game.piece.IGamePiece;
+import io.github.phantamanta44.openar.game.piece.PieceInstance;
 import io.github.phantamanta44.openar.game.piece.PieceRegistry;
 import io.github.phantamanta44.openar.game.piece.impl.PieceBorder;
 import io.github.phantamanta44.openar.util.Array2D;
@@ -10,67 +10,70 @@ import io.github.phantamanta44.openar.util.math.IntVector;
 
 public class MapFile {
 
-	private Array2D<IGamePiece> pieceGrid = new Array2D<>(20, 13);
-	private Array2D<Integer> rotGrid = new Array2D<>(20, 13);
-	private Array2D<Integer> metaGrid = new Array2D<>(20, 13);
-	private Array2D<Integer> intGrid = new Array2D<>(20, 13);
+    private final Array2D<PieceInstance> pieceGrid = new Array2D<>(20, 13);
 
-	private MapFile() {
-		rotGrid.fill(() -> 0);
-		metaGrid.fill(() -> 0);
-		intGrid.fill(() -> 0);
-	}
+    private MapFile() {
+        // Cells are populated directly by parse().
+    }
 
-	public static MapFile parse(String[] t) {
-		MapFile map = new MapFile();
-		try {
-			for (int i = 0; i < 13; i++) {
-				for (int j = 0; j < 20; j++) {
-					char[] token = t[i].substring(j * 4, (j + 1) * 4).toCharArray();
-					map.pieceGrid.set(j, i, PieceRegistry.getPiece(Character.toString(token[0])));
-					if (token[1] != ' ')
-						map.rotGrid.set(j, i, Integer.parseInt(Character.toString(token[1])));
-					map.metaGrid.set(j, i, BeamColor.fromToken(Character.toString(token[2])).ordinal());
-					map.intGrid.set(j, i, Mutability.fromToken(Character.toString(token[3])).bitmask());
-				}
-			}
-		} catch (Exception e) {
-			Aargon.getLogger().error("Map parsing failed!");
-			e.printStackTrace();
-		}
-		return map;
-	}
+    public static MapFile parse(String[] t) {
+        MapFile map = new MapFile();
+        try {
+            for (int i = 0; i < 13; i++) {
+                for (int j = 0; j < 20; j++) {
+                    char[] token = t[i].substring(j * 4, (j + 1) * 4).toCharArray();
 
-	public void populate(GameField f) {
-		pieceGrid.forEach((p, c) -> {
-			f.setPiece(c, p);
-			f.setRotation(c, rotGrid.get(c));
-			f.setMeta(c, metaGrid.get(c));
-			f.setMutability(c, intGrid.get(c));
-		});
+                    int rotation = token[1] == ' '
+                            ? 0
+                            : Integer.parseInt(Character.toString(token[1]));
+                    int meta = BeamColor.fromToken(Character.toString(token[2])).ordinal();
+                    int mutability = Mutability.fromToken(Character.toString(token[3])).bitmask();
 
-		if (Boolean.getBoolean("aargon.debugBorders")) {
-			Aargon.getLogger().info("Border diagnostics (x,y rot meta topology[NESW])");
-			pieceGrid.forEach((p, c) -> {
-				if (p instanceof PieceBorder) {
-					boolean n = isBorder(c.getX(), c.getY() - 1);
-					boolean e = isBorder(c.getX() + 1, c.getY());
-					boolean s = isBorder(c.getX(), c.getY() + 1);
-					boolean w = isBorder(c.getX() - 1, c.getY());
-					Aargon.getLogger().info(
-							"BORDER {},{} rot={} meta={} topology={}{}{}{}",
-							c.getX(), c.getY(), rotGrid.get(c), metaGrid.get(c),
-							n ? "N" : "-", e ? "E" : "-", s ? "S" : "-", w ? "W" : "-");
-				}
-			});
-		}
+                    map.pieceGrid.set(j, i, new PieceInstance(
+                            PieceRegistry.getDefinition(Character.toString(token[0])),
+                            rotation,
+                            meta,
+                            mutability));
+                }
+            }
+        } catch (Exception e) {
+            Aargon.getLogger().error("Map parsing failed!");
+            e.printStackTrace();
+        }
+        return map;
+    }
 
-		f.updateBeams();
-	}
+    public void populate(GameField f) {
+        pieceGrid.forEach((state, c) -> {
+            f.setPiece(c, state.getImplementation());
+            f.setRotation(c, state.getRotation());
+            f.setMeta(c, state.getMeta());
+            f.setMutability(c, state.getMutability());
+        });
 
-	private boolean isBorder(int x, int y) {
-		if (x < 0 || y < 0 || x >= 20 || y >= 13) return false;
-		return pieceGrid.get(new IntVector(x, y)) instanceof PieceBorder;
-	}
+        if (Boolean.getBoolean("aargon.debugBorders")) {
+            Aargon.getLogger().info("Border diagnostics (x,y rot meta topology[NESW])");
+            pieceGrid.forEach((state, c) -> {
+                if (state.getImplementation() instanceof PieceBorder) {
+                    boolean n = isBorder(c.getX(), c.getY() - 1);
+                    boolean e = isBorder(c.getX() + 1, c.getY());
+                    boolean s = isBorder(c.getX(), c.getY() + 1);
+                    boolean w = isBorder(c.getX() - 1, c.getY());
+                    Aargon.getLogger().info(
+                            "BORDER {},{} rot={} meta={} topology={}{}{}{}",
+                            c.getX(), c.getY(), state.getRotation(), state.getMeta(),
+                            n ? "N" : "-", e ? "E" : "-", s ? "S" : "-", w ? "W" : "-");
+                }
+            });
+        }
+
+        f.updateBeams();
+    }
+
+    private boolean isBorder(int x, int y) {
+        if (x < 0 || y < 0 || x >= 20 || y >= 13) return false;
+        PieceInstance state = pieceGrid.get(new IntVector(x, y));
+        return state != null && state.getImplementation() instanceof PieceBorder;
+    }
 
 }
