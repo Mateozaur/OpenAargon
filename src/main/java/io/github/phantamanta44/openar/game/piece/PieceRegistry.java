@@ -2,58 +2,99 @@ package io.github.phantamanta44.openar.game.piece;
 
 import io.github.phantamanta44.openar.Aargon;
 import io.github.phantamanta44.openar.game.piece.impl.*;
-import io.github.phantamanta44.openar.game.piece.impl.PieceLegacyStub;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+/**
+ * Backwards-compatible access point for game pieces.
+ *
+ * Legacy maps still resolve one-character tokens here, while new code can use
+ * stable PieceId values through the same canonical PieceCatalog.
+ */
 public class PieceRegistry {
 
-	private static final Map<String, IGamePiece> registry = new ConcurrentHashMap<>();
-	public static final IGamePiece EMPTY = new PieceAir();
+    private static final PieceCatalog CATALOG = new PieceCatalog();
+    private static boolean initialized = false;
 
-	public static void init() {
-		registerPiece(new PieceAir());
-		registerPiece(new PieceBorder());
-		registerPiece(new PieceCoin());
-		registerPiece(new PieceDoubleMirror());
-		registerPiece(new PieceDoubleSlit());
-		registerPiece(new PieceFilter());
-		registerPiece(new PieceMine());
-		registerPiece(new PieceMirror());
-		registerPiece(new PieceOneWay());
-		registerPiece(new PiecePolarizer());
-		registerPiece(new PiecePrism());
-		registerPiece(new PieceRefractor());
-		registerPiece(new PieceSlime());
-		registerPiece(new PieceSource());
-		registerPiece(new PieceSplitter());
-		registerPiece(new PieceTNT());
-		registerPiece(new PieceThreeWay());
-		registerPiece(new PieceWall());
-        registerPiece(new PieceLegacyStub("Light Bender", "@"));
-        registerPiece(new PieceLegacyStub("Selector", "I"));
-        registerPiece(new PieceLegacyStub("Convert", "J"));
-        registerPiece(new PieceLegacyStub("Complex", "L"));
-        registerPiece(new PieceLegacyStub("Prismirror", "M"));
-        registerPiece(new PieceLegacyStub("Fuel Cell", "c"));
-        registerPiece(new PieceLegacyStub("Black Hole", "h"));
-        registerPiece(new PieceLegacyStub("Spaceship", "p"));
-        registerPiece(new PieceLegacyStub("Water", "w"));
-        registerPiece(new PieceLegacyStub("Splicer", "y"));
-	}
+    public static final IGamePiece EMPTY = new PieceAir();
 
-	public static void registerPiece(IGamePiece piece) {
-		registry.put(piece.getToken(), piece);
-	}
+    public static synchronized void init() {
+        if (initialized) {
+            return;
+        }
 
-	public static IGamePiece getPiece(String token) {
-		IGamePiece piece = registry.get(token);
-		if (piece == null) {
-			Aargon.getLogger().warn("Unknown piece '{}'!", token);
-			return EMPTY;
-		}
-		return piece;
-	}
+        registerPiece("air", new PieceAir());
+        registerPiece("border", new PieceBorder());
+        registerPiece("coin", new PieceCoin());
+        registerPiece("double_mirror", new PieceDoubleMirror());
+        registerPiece("double_slit", new PieceDoubleSlit());
+        registerPiece("filter", new PieceFilter());
+        registerPiece("mine", new PieceMine());
+        registerPiece("mirror", new PieceMirror());
+        registerPiece("one_way", new PieceOneWay());
+        registerPiece("polarizer", new PiecePolarizer());
+        registerPiece("prism", new PiecePrism());
+        registerPiece("refractor", new PieceRefractor());
+        registerPiece("slime", new PieceSlime());
+        registerPiece("source", new PieceSource());
+        registerPiece("splitter", new PieceSplitter());
+        registerPiece("tnt", new PieceTNT());
+        registerPiece("three_way", new PieceThreeWay());
+        registerPiece("wall", new PieceWall());
+
+        registerPiece("light_bender", new PieceLegacyStub("Light Bender", "@"));
+        registerPiece("selector", new PieceLegacyStub("Selector", "I"));
+        registerPiece("convert", new PieceLegacyStub("Convert", "J"));
+        registerPiece("complex", new PieceLegacyStub("Complex", "L"));
+        registerPiece("prismirror", new PieceLegacyStub("Prismirror", "M"));
+        registerPiece("fuel_cell", new PieceLegacyStub("Fuel Cell", "c"));
+        registerPiece("black_hole", new PieceLegacyStub("Black Hole", "h"));
+        registerPiece("spaceship", new PieceLegacyStub("Spaceship", "p"));
+        registerPiece("water", new PieceLegacyStub("Water", "w"));
+        registerPiece("splicer", new PieceLegacyStub("Splicer", "y"));
+
+        initialized = true;
+    }
+
+    public static void registerPiece(String id, IGamePiece piece) {
+        CATALOG.register(new PieceDefinition(PieceId.of(id), piece.getToken(), piece));
+    }
+
+    /**
+     * Compatibility overload for callers that have not adopted canonical IDs.
+     * New registrations should always provide an explicit stable id.
+     */
+    @Deprecated
+    public static void registerPiece(IGamePiece piece) {
+        String fallbackId = "legacy." + piece.getName()
+                .trim()
+                .toLowerCase()
+                .replace(' ', '_');
+        registerPiece(fallbackId, piece);
+    }
+
+    public static PieceCatalog getCatalog() {
+        return CATALOG;
+    }
+
+    public static PieceDefinition getDefinition(PieceId id) {
+        return CATALOG.get(id);
+    }
+
+    public static IGamePiece getPiece(PieceId id) {
+        PieceDefinition definition = CATALOG.get(id);
+        if (definition == null) {
+            Aargon.getLogger().warn("Unknown piece id '{}'!", id);
+            return EMPTY;
+        }
+        return definition.getImplementation();
+    }
+
+    public static IGamePiece getPiece(String token) {
+        PieceDefinition definition = CATALOG.getByLegacyToken(token);
+        if (definition == null) {
+            Aargon.getLogger().warn("Unknown piece '{}'!", token);
+            return EMPTY;
+        }
+        return definition.getImplementation();
+    }
 
 }
