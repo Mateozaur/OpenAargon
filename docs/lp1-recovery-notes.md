@@ -69,31 +69,35 @@ Both are represented as 20x15 atlases by `LegacyTileSet`; this is only structura
 
 ### Confirmed
 
-- Repository code search for `TILESFILE` does not find the original piece-definition corpus. The previously inspected `Aargon Deluxe Collectors Edition 1.4.CE/Pieces/*.pce` files are therefore external/original-game evidence, not files currently tracked by OpenAargon.
+- The `linux-modernization` branch **does track the original Collector's Edition asset tree** at `Aargon Deluxe Collectors Edition 1.4.CE/`. The repository root also contains `Aargon Deluxe Collectors Edition 1.4.CE.zip`. Previous notes claiming that the `.pce` / `black_tiles*.bmp` corpus was external or unavailable in the repository were incorrect and must not be used as a premise in future work.
+- GitHub code search not returning `TILESFILE` is therefore only an indexing/search limitation; it is not evidence that the files are absent. Future investigation should traverse the tracked Collector's Edition directory directly.
 - Commit `2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8` added `base.png`, `lp1.png`, `lp2.png`, `lp3.png`, `lp4.png`, `classic.png`, `hotter.png`, `pocket.png`, `exp1.png`, and `exp2.png` together with the initial Collector's Edition legacy renderer.
 - The commit records the atlas blobs but contains no documented conversion script, source-BMP path, or provenance metadata tying `base.png`/`lp1.png` to particular `black_tiles*.bmp` files. Git history at the introduction commit therefore does **not** by itself prove index preservation.
-- GitHub exposes the repository PNG blobs, but their binary contents are not sufficient provenance evidence on their own. Pixel/cell comparison remains a fallback validation technique, not a substitute for tracing the original `TILESFILE` resource selection if the original files can be recovered.
+- GitHub exposes the repository PNG blobs, but pixel/cell comparison remains a fallback validation technique, not a substitute for tracing the original `TILESFILE` resource selection when the tracked original assets can answer it directly.
 
 ### Still unresolved
 
-- Full inventory of `TILESFILE` / `SmallTILESFILE` across the original `Pieces/*.pce` corpus. Only previously inspected examples such as `brick.pce` and `selector.pce` are currently established.
+- Full inventory of `TILESFILE` / `SmallTILESFILE` across `Aargon Deluxe Collectors Edition 1.4.CE/Pieces/*.pce`. Only previously inspected examples such as `brick.pce` and `selector.pce` are currently established.
 - Whether LP1 supplies/replaces a physical `black_tiles.bmp` under the same logical name, and how the original game resolves that filename when LP1 is active.
 - Exact source files or conversion process used to produce OpenAargon's `base.png` and `lp1.png`.
 - Whether ordinary `atlas=base` picture indices preserve semantic identity in LP1.
 
 ### Next best evidence
 
-1. Recover or re-access the original Collector's Edition / LP1 asset tree used earlier in this investigation and inventory all `Pieces/*.pce` `TILESFILE` values plus all `black_tiles*.bmp` files and their locations.
-2. Inspect `PACK.INI` and any resource/search-path configuration around LP1 to determine whether `black_tiles.bmp` is replaced by pack-local lookup while keeping shared `.pce` definitions.
-3. If the original asset tree cannot establish provenance, compare `base.png` and `lp1.png` on their 20x15 cell grid, then cross-check changed/same slots against authoritative PCE picture indices. Semantic slot identity matters; pixel equality is not required.
+1. Directly traverse the tracked `Aargon Deluxe Collectors Edition 1.4.CE/` directory. Inventory every `Pieces/*.pce` `TILESFILE` / `SmallTILESFILE` value and locate every `black_tiles*.bmp` file and its directory.
+2. Inspect LP1 `PACK.INI` plus any resource/search-path configuration in the tracked original files to determine whether `black_tiles.bmp` is resolved or replaced pack-locally while the shared `.pce` definitions remain unchanged.
+3. Correlate the physical BMP files with OpenAargon's `base.png` and `lp1.png` where possible (dimensions, content, conversion history/provenance).
+4. If original-resource tracing is still insufficient, compare `base.png` and `lp1.png` on their 20x15 cell grid and cross-check changed/same slots against authoritative PCE picture indices. Semantic slot identity matters; pixel equality is not required.
 
 ## Next validation steps
 
-1. Inventory `TILESFILE` / `SmallTILESFILE` values in the original `Pieces/*.pce` files to separate ordinary/base pieces from `exp1` / `exp2` pieces.
-2. Locate the original physical tile sheets (`black_tiles*.bmp`) and any pack/style-specific variants, or identify exactly how `base.png` and `lp1.png` were generated in commit/history/scripts.
-3. If provenance is insufficient, compare `base.png` and `lp1.png` cell-by-cell using their 20x15 grid and cross-check candidate cells against known PCE indices.
-4. Record per-piece/index evidence. Add rows to `styles/lp1.csv` only for verified LP1 deviations; leave preserved mappings to the normal fallback.
-5. Keep this file updated whenever a new class of mapping is proven or disproven.
+1. Inventory `TILESFILE` / `SmallTILESFILE` values in tracked `Aargon Deluxe Collectors Edition 1.4.CE/Pieces/*.pce` files to separate ordinary/base pieces from `exp1` / `exp2` pieces.
+2. Locate all original physical tile sheets (`black_tiles*.bmp`) and pack/style-specific variants in the tracked Collector's Edition tree.
+3. Inspect LP1 `PACK.INI` and related configuration/code to establish the original resource lookup rules for `TILESFILE=black_tiles.bmp`.
+4. Determine whether `base.png` and `lp1.png` correspond directly to particular original BMP sheets and whether tile order was preserved.
+5. If provenance is insufficient, compare `base.png` and `lp1.png` cell-by-cell using their 20x15 grid and cross-check candidate cells against known PCE indices.
+6. Record per-piece/index evidence. Add rows to `styles/lp1.csv` only for verified LP1 deviations; leave preserved mappings to the normal fallback.
+7. Keep this file updated whenever a new class of mapping is proven or disproven.
 
 ## Existing relevant commits
 
@@ -108,9 +112,9 @@ The Collector's Edition legacy-rendering support itself was introduced by commit
 
 ## Resume here
 
-Do **not** spend more time on Selector or the LP1 skill DLL first. Resume by tracing the ordinary `black_tiles` atlas family / `TILESFILE` values and proving whether `atlas=base` indices retain their meaning in LP1. Only verified deviations should become `lp1.csv` rows.
+Do **not** spend more time on Selector or the LP1 skill DLL first. Resume by directly traversing the tracked `Aargon Deluxe Collectors Edition 1.4.CE/` asset tree and tracing the ordinary `black_tiles` atlas family / `TILESFILE` values. Prove whether `atlas=base` indices retain their meaning in LP1. Only verified deviations should become `lp1.csv` rows.
 
-Current checkpoint: Git history does not document atlas provenance, and the original `Pieces/*.pce` / `black_tiles*.bmp` corpus is not tracked in this repository. The highest-value next step is to recover/re-access that original asset tree; otherwise proceed with a cell-by-cell `base.png` vs `lp1.png` semantic-index comparison.
+Current checkpoint: the earlier claim that the original Collector's Edition asset tree was unavailable was wrong. Both `Aargon Deluxe Collectors Edition 1.4.CE/` and `Aargon Deluxe Collectors Edition 1.4.CE.zip` are present in the repository root on `linux-modernization`. The highest-value next action is therefore a direct inventory of `Pieces/*.pce`, `black_tiles*.bmp`, LP1 `PACK.INI`, and the resource lookup relationship between them.
 
 ```text
 Repository: Mateozaur/OpenAargon
@@ -131,11 +135,16 @@ First read docs/lp1-recovery-notes.md and treat it as the hand-off state.
 Do not redo the Selector investigation: Selector (I / token 73) is already
 proven to use the shared exp1 atlas and must not get LP1 overrides.
 
-Resume from the unresolved task: verify whether mappings currently using
-atlas=base preserve their tile-index semantics in LP1, by tracing the original
-black_tiles/TILESFILE assets and the provenance of base.png and lp1.png.
-Only add rows to styles/lp1.csv for deviations supported by concrete evidence.
-Keep docs/lp1-recovery-notes.md updated with new confirmed findings.
+Important correction: the branch directly contains the original asset tree
+Aargon Deluxe Collectors Edition 1.4.CE/ (and its ZIP at repository root).
+Do not rely on GitHub code search to decide whether these assets exist.
+
+Resume by directly inventorying Pieces/*.pce TILESFILE/SmallTILESFILE values,
+all black_tiles*.bmp files, and LP1 PACK.INI/resource lookup behavior. Use that
+evidence to verify whether mappings currently using atlas=base preserve their
+tile-index semantics in LP1. Only add rows to styles/lp1.csv for deviations
+supported by concrete evidence. Keep docs/lp1-recovery-notes.md updated with
+new confirmed findings.
 ```
 
 The chat/UI warning about conversation length is not itself a project-state change; this section exists only so work can be resumed safely if a new conversation becomes necessary.
