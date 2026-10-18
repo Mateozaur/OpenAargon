@@ -165,4 +165,6 @@ The chat/UI warning about conversation length is not itself a project-state chan
 - Searched the same tree for `PACK.INI` paths.
 - Searched the same tree for `Pieces/` paths to establish the scope of the `.pce` inventory.
 - The exact inventory conclusions are intentionally not recorded yet because the next step is to reproduce the traversal locally with deterministic `find`/`rg` commands and record their exact output rather than infer from truncated connector search output.
-- Next action: obtain a local checkout of `linux-modernization`, then run exact filesystem inventories for `black_tiles*.bmp`, `PACK.INI`, and `Pieces/*.pce` `TILESFILE` / `SmallTILESFILE` declarations.
+- Attempted a local shallow clone of `linux-modernization` into `/mnt/data/OpenAargon` to run deterministic `find`/`rg` inventories. The attempt failed before checkout because the execution environment could not resolve `github.com` (`Could not resolve host: github.com`); no repository files or project state were modified by that attempt.
+- Because direct network checkout is unavailable, the investigation returns to the connected GitHub API and will enumerate the relevant directories/files there explicitly.
+- Next action: query the Collector's Edition root and `Pieces/` directory through the connector, record exact file paths/counts, then fetch LP1 `PACK.INI` and representative/all `.pce` declarations.
