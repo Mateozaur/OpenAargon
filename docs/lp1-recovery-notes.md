@@ -65,6 +65,28 @@ lp1.png   blob 87ab0fe3c09e2e26dca009d21e50791cfa1e3570  ~340425 bytes
 
 Both are represented as 20x15 atlases by `LegacyTileSet`; this is only structural evidence, not proof of index equivalence.
 
+## TILESFILE investigation checkpoint (2026-10-18)
+
+### Confirmed
+
+- Repository code search for `TILESFILE` does not find the original piece-definition corpus. The previously inspected `Aargon Deluxe Collectors Edition 1.4.CE/Pieces/*.pce` files are therefore external/original-game evidence, not files currently tracked by OpenAargon.
+- Commit `2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8` added `base.png`, `lp1.png`, `lp2.png`, `lp3.png`, `lp4.png`, `classic.png`, `hotter.png`, `pocket.png`, `exp1.png`, and `exp2.png` together with the initial Collector's Edition legacy renderer.
+- The commit records the atlas blobs but contains no documented conversion script, source-BMP path, or provenance metadata tying `base.png`/`lp1.png` to particular `black_tiles*.bmp` files. Git history at the introduction commit therefore does **not** by itself prove index preservation.
+- GitHub exposes the repository PNG blobs, but their binary contents are not sufficient provenance evidence on their own. Pixel/cell comparison remains a fallback validation technique, not a substitute for tracing the original `TILESFILE` resource selection if the original files can be recovered.
+
+### Still unresolved
+
+- Full inventory of `TILESFILE` / `SmallTILESFILE` across the original `Pieces/*.pce` corpus. Only previously inspected examples such as `brick.pce` and `selector.pce` are currently established.
+- Whether LP1 supplies/replaces a physical `black_tiles.bmp` under the same logical name, and how the original game resolves that filename when LP1 is active.
+- Exact source files or conversion process used to produce OpenAargon's `base.png` and `lp1.png`.
+- Whether ordinary `atlas=base` picture indices preserve semantic identity in LP1.
+
+### Next best evidence
+
+1. Recover or re-access the original Collector's Edition / LP1 asset tree used earlier in this investigation and inventory all `Pieces/*.pce` `TILESFILE` values plus all `black_tiles*.bmp` files and their locations.
+2. Inspect `PACK.INI` and any resource/search-path configuration around LP1 to determine whether `black_tiles.bmp` is replaced by pack-local lookup while keeping shared `.pce` definitions.
+3. If the original asset tree cannot establish provenance, compare `base.png` and `lp1.png` on their 20x15 cell grid, then cross-check changed/same slots against authoritative PCE picture indices. Semantic slot identity matters; pixel equality is not required.
+
 ## Next validation steps
 
 1. Inventory `TILESFILE` / `SmallTILESFILE` values in the original `Pieces/*.pce` files to separate ordinary/base pieces from `exp1` / `exp2` pieces.
@@ -87,6 +109,8 @@ The Collector's Edition legacy-rendering support itself was introduced by commit
 ## Resume here
 
 Do **not** spend more time on Selector or the LP1 skill DLL first. Resume by tracing the ordinary `black_tiles` atlas family / `TILESFILE` values and proving whether `atlas=base` indices retain their meaning in LP1. Only verified deviations should become `lp1.csv` rows.
+
+Current checkpoint: Git history does not document atlas provenance, and the original `Pieces/*.pce` / `black_tiles*.bmp` corpus is not tracked in this repository. The highest-value next step is to recover/re-access that original asset tree; otherwise proceed with a cell-by-cell `base.png` vs `lp1.png` semantic-index comparison.
 
 ```text
 Repository: Mateozaur/OpenAargon
