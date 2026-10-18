@@ -4,42 +4,59 @@ _Last updated: 2026-10-18_
 
 Live hand-off state for the Collector's Edition Level Pack 1 (LP1) legacy-rendering investigation.
 
+## Goal
+
+Preserve original Collector's Edition rendering semantics while modernizing OpenAargon's legacy renderer. The question is not whether LP1 looks different, but whether LP1 changes the semantic meaning of shared PCE picture indices. Do not create LP1-specific mappings merely because LP1 has a different atlas.
+
 ## Safety rule
 
-Do **not** add rows to `src/main/resources/legacy/styles/lp1.csv` from visual guesses, equal dimensions, or unvalidated binary hypotheses. An override needs concrete original-asset evidence or a validated index-preservation method.
+Do **not** add rows to `src/main/resources/legacy/styles/lp1.csv` from visual guesses, equal dimensions, index ranges, or unvalidated binary hypotheses. Add an override only for a concrete, verified semantic slot deviation.
 
-## Confirmed model
+## Confirmed rendering model
 
-- `src/main/resources/legacy/render-map.csv` is the shared mapping; style CSVs are sparse overrides.
-- Generic `atlas=base` uses the currently selected legacy style atlas; `exp1` / `exp2` remain shared expansion atlases.
-- `LegacyTileSet.BASE` and `LEVEL_PACK_1` are both 20x15, but dimensions alone do not prove semantic slot equality.
-- Original `Pieces/*.pce` picture tables are authoritative sources for piece render indices.
-- LP1 has no alternate `Pieces/*.pce` corpus; the key question is whether its ordinary sheet preserves shared-PCE slot semantics.
+- `src/main/resources/legacy/render-map.csv` is the shared token/state mapping; style CSVs are sparse overrides.
+- Generic `atlas=base` resolves against the currently selected legacy style atlas.
+- Explicit `atlas=exp1` / `atlas=exp2` remain shared expansion atlases.
+- Original `Pieces/*.pce` picture tables are authoritative for token/state -> picture index and logical tile-sheet selection.
+- `blank.pce` documents ordinary defaults as `black_tiles.bmp` / `black_tiles_small.bmp`.
+- LP1 has no alternate PCE corpus.
+- Real LP1 maps contain shared piece tokens, not atlas/index remap tables.
 
 ## Resolved — do not redo first
 
 ### Selector (`I`, token 73)
 
-`Pieces/selector.pce` explicitly uses `black_tiles_exp1.bmp` / `black_tiles_small_exp1.bmp`. Its picture values and offsets reproduce the existing Selector rows in `render-map.csv` under `atlas=exp1`. Selector stays on shared exp1 and needs no LP1 override.
+`Pieces/selector.pce` explicitly selects `black_tiles_exp1.bmp` / `black_tiles_small_exp1.bmp`. Its picture values and offsets reproduce existing Selector rows in `render-map.csv` under `atlas=exp1`. Selector stays shared-exp1 and needs no LP1 override.
 
-### LP1 skill / downstream DLLs
+### DLL dead ends
 
-`RELEASE_LevelPackOne.dll` implements LP1 skill/level-selection UI, not token-to-sprite mapping. `RELEASE_ItemMap.dll::MAP::SelectTile(CPosition)` and `RELEASE_TileBlitter.dll` are also not mapping sources.
+- LP1 `PACK.INI` specifies `SelectSkillDll=LevelPackOne`.
+- `RELEASE_LevelPackOne.dll` is LP1 skill/level-selection UI, not token-to-sprite mapping.
+- `RELEASE_ItemMap.dll::MAP::SelectTile(CPosition)` and `RELEASE_TileBlitter.dll` are not mapping sources.
 
-## Atlas provenance checkpoint
+## Atlas provenance
 
-Commit `2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8` introduced Collector's Edition legacy rendering plus `base.png`, `lp1.png`, `lp2.png`, `lp3.png`, `lp4.png`, `classic.png`, `hotter.png`, `pocket.png`, `exp1.png`, `exp2.png`; no conversion script/source-BMP provenance was documented there.
-
-Known blobs:
+Commit `2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8` (`Add Collector's Edition legacy rendering support`) introduced the legacy renderer plus all of these PNG atlases in one commit:
 
 ```text
-base.png  e1e903a202b7d8c301f46cfa12291abe4a383ae4  ~320631 bytes
-lp1.png   87ab0fe3c09e2e26dca009d21e50791cfa1e3570  ~340425 bytes
+base.png classic.png exp1.png exp2.png hotter.png
+lp1.png lp2.png lp3.png lp4.png pocket.png
 ```
 
-## Original tile-sheet evidence
+Its single parent is `98625d829872afc6a3aad6a6c89bef0261781079` (`Normalize border T-junction rendering`). The parent change concerns `PieceBorder.java`; it contains no atlas-generation provenance. The introduction commit's diff defines `LegacyTileSet.LEVEL_PACK_1` as `texture/legacy/lp1.png`, 20x15, but contains no checked-in conversion script or source-BMP-to-PNG remap procedure.
 
-Tracked CE tree: `Aargon Deluxe Collectors Edition 1.4.CE/`.
+Known PNG blobs:
+
+```text
+base.png  e1e903a202b7d8c301f46cfa12291abe4a383ae4
+lp1.png   87ab0fe3c09e2e26dca009d21e50791cfa1e3570
+```
+
+Repository/index searches for likely conversion provenance (`black_tiles.bmp`, ImageMagick/convert/png/bmp terms) returned no useful indexed results. Commit search also returned no matches even for the known introduction commit/message, so those search negatives are treated as connector/index limitations, not evidence of absence.
+
+## Original CE tile-sheet evidence
+
+Tracked tree: `Aargon Deluxe Collectors Edition 1.4.CE/`.
 
 Shared/root sheets:
 
@@ -56,35 +73,54 @@ LP1 pack-local ordinary sheets:
 
 ```text
 Level Packs/Level Pack 1/Pictures/black_tiles.bmp
-  921654 bytes  768d05581ab0a2a39beb9e29c492e869d07eb2fe
+  921654  768d05581ab0a2a39beb9e29c492e869d07eb2fe
 Level Packs/Level Pack 1/Pictures/black_tiles_small.bmp
-   57654 bytes  e27ac267529a3f56020508c07775414f114a4032
+   57654  e27ac267529a3f56020508c07775414f114a4032
 ```
 
-LP1 contains no `black_tiles_exp*` files. Thus LP1 overrides only the ordinary pair; exp1/exp2 remain shared.
+LP1 contains no `black_tiles_exp*`, so LP1 replaces only the ordinary pair while expansion sheets remain shared.
 
-### Repeated pack-local convention across all four level packs
-
-All four original Level Packs ship same-named ordinary tile sheets under their own `Pictures/` directories:
+All four original Level Packs ship same-named pack-local ordinary pairs:
 
 ```text
-Level Pack 1 black_tiles.bmp        921654  768d05581ab0a2a39beb9e29c492e869d07eb2fe
-Level Pack 1 black_tiles_small.bmp   57654  e27ac267529a3f56020508c07775414f114a4032
-Level Pack 2 black_tiles.bmp        921654  1c049d0baf5de562518ac4df894dc2bb5be7c4b4
-Level Pack 2 black_tiles_small.bmp   57654  fb9fd458550f87cc3696e980277813b9bf10e809
-Level Pack 3 black_tiles.bmp        921656  a6bb5fe81ddbb399640a051a5459bd66bdbafa0a
-Level Pack 3 black_tiles_small.bmp   57656  f039e588b1af4a0bc4af90ac4a3cd20454889ec6
-Level Pack 4 black_tiles.bmp        921654  3f63fff739958dc1473564d083d6dc725c52eacf
-Level Pack 4 black_tiles_small.bmp   57654  97dbb2e35c8eb67c3b0e9f6e7bcd76fc6d08fddc
+LP1 full  921654  768d05581ab0a2a39beb9e29c492e869d07eb2fe
+LP1 small  57654  e27ac267529a3f56020508c07775414f114a4032
+LP2 full  921654  1c049d0baf5de562518ac4df894dc2bb5be7c4b4
+LP2 small  57654  fb9fd458550f87cc3696e980277813b9bf10e809
+LP3 full  921656  a6bb5fe81ddbb399640a051a5459bd66bdbafa0a
+LP3 small  57656  f039e588b1af4a0bc4af90ac4a3cd20454889ec6
+LP4 full  921654  3f63fff739958dc1473564d083d6dc725c52eacf
+LP4 small  57654  97dbb2e35c8eb67c3b0e9f6e7bcd76fc6d08fddc
 ```
 
-The repeated directory and filename convention across LP1-LP4 is very strong architectural evidence that active Level Packs intentionally supply their own ordinary `black_tiles` resources. LP3 is a caveat: both LP3 files are exactly two bytes larger, so do not claim byte-identical BMP format from size alone.
+This repeated path/name convention is strong architectural evidence that active Level Packs intentionally supply their own ordinary `black_tiles` resource. LP3's +2-byte files are a known exception; do not generalize all packs as byte-size-identical.
 
-### BMP-header inspection attempt
+### Binary BMP header confirmation
 
-Attempted to fetch shared/base `black_tiles.bmp` as a binary blob. The GitHub connector failed with `UnicodeDecodeError` because it tried to decode the blob as UTF-8. No bytes were returned. BMP header fields and LP3's +2-byte cause remain unconfirmed.
+Earlier direct binary blob access failed with a `UnicodeDecodeError`. A later attempt using `GitHub.fetch_file(..., encoding=base64)` succeeded for the beginning of the binary and allows the BMP header to be decoded directly.
 
-The arithmetic `921654 = 54 + 640*480*3` and `57654 = 54 + 160*120*3` is compatible with ordinary 24-bit BMP payloads with 54-byte headers, but this remains a hypothesis until binary bytes can actually be inspected. Do not promote it to a confirmed fact.
+Confirmed LP1 `black_tiles.bmp` header:
+
+```text
+signature       BM
+file size       921654
+pixel offset    54
+DIB header      40 bytes
+width           640
+height          480
+planes          1
+bits/pixel      24
+compression     0 (BI_RGB / uncompressed)
+image payload   921600
+X pixels/meter  5272
+Y pixels/meter  5272
+colors used     0
+important       0
+```
+
+Confirmed shared/base `Pictures/black_tiles.bmp` has the same structural fields and pixel payload dimensions; its X/Y resolution metadata is 5176 instead of LP1's 5272. Thus the earlier arithmetic hypothesis `921654 = 54 + 640*480*3` is now **confirmed** for both base and LP1 full ordinary sheets, rather than merely inferred from size.
+
+The connector supports line-ranged base64 reads, but reconstructing the complete ~922 KB BMP and complete compressed PNG through chat-sized chunks is not practical in this session. Therefore direct pixel-for-pixel LP1 BMP -> `lp1.png` coordinate comparison remains unavailable.
 
 ## LP1 PACK.INI
 
@@ -97,175 +133,158 @@ SelectSkillDll=LevelPackOne
 IsEmpty=false
 ```
 
-No tile filename, `Pictures` path, atlas name, or resource-search-path field exists. Pack-local ordinary-sheet selection is not explicitly configured in `PACK.INI`.
+It has no tile filename, Pictures path, atlas name, or resource-search-path field. Pack-local sheet lookup must therefore be generic elsewhere, not configured per LP1 in `PACK.INI`.
 
-## LP1 level-format and shared-PCE evidence
+## Real LP1 map / shared-PCE evidence
 
-`Level Packs/Level Pack 1/Levels/` contains `Skill1`-`Skill4`. `Skill1/Level_001.map` (`LANDING LIGHTS`) is a plain token-oriented map plus `MAPTEXT`, `SCRIPT`, and copyright fields. It contains tokens including `O` and `S` but no tile-sheet filename, atlas name, picture-index table, or pack-local remapping table.
+`Level Packs/Level Pack 1/Levels/` contains `Skill1` through `Skill4`.
 
-Representative token correlation against the **shared** `Pieces/*.pce` corpus:
+`Skill1/Level_001.map` (`LANDING LIGHTS`) is token-oriented board data plus `MAPTEXT`, `SCRIPT`, and copyright fields. It contains tokens including `O` and `S`, but no atlas filename, picture-index table, or remap table.
+
+Verified token correlations:
 
 ```text
-LP1 map token O -> Pieces/coin.pce
-  TOKEN = O
-  no TilesFile / SmallTilesFile override
-  therefore uses documented ordinary defaults black_tiles.bmp / black_tiles_small.bmp
+LP1 token O -> Pieces/coin.pce
+  TOKEN=O
+  no TilesFile override -> ordinary black_tiles.bmp
 
-LP1 map token S -> Pieces/source.pce
-  TOKEN = S
-  no TilesFile / SmallTilesFile override
-  therefore uses documented ordinary defaults black_tiles.bmp / black_tiles_small.bmp
+LP1 token S -> Pieces/source.pce
+  TOKEN=S
+  no TilesFile override -> ordinary black_tiles.bmp
 
-Pieces/spaceship.pce (contrast case)
-  TOKEN = p
-  TilesFile = black_tiles_exp1.bmp
-  SmallTilesFile = black_tiles_small_exp1.bmp
+Pieces/brick.pce
+  TOKEN=#
+  no TilesFile override -> ordinary black_tiles.bmp
+
+Pieces/spaceship.pce contrast
+  TOKEN=p
+  TilesFile=black_tiles_exp1.bmp
+  SmallTilesFile=black_tiles_small_exp1.bmp
 ```
 
-`brick.pce` has `TOKEN = #`, no tile-file override, and therefore uses ordinary defaults.
+This establishes the resource/index contract:
 
-The combined original-game data strongly supports this resource/index contract:
+1. LP1 maps store shared tokens, not atlas/index remaps.
+2. Shared PCE definitions turn token/state into picture indices and select a logical ordinary/expansion sheet.
+3. LP1 supplies a same-named pack-local ordinary `black_tiles.bmp`, but no local expansion replacement and no alternate PCE corpus.
+4. Therefore the LP1 ordinary sheet is intended to be consumed at the picture indices emitted by the shared PCE definitions.
 
-1. LP1 maps store shared piece tokens rather than atlas/index remaps.
-2. Shared PCE definitions convert tokens/state into picture indices and choose ordinary vs expansion logical tile-sheet names.
-3. LP1 supplies a same-named ordinary `black_tiles.bmp`, while expansion sheets remain shared.
-4. Therefore LP1's ordinary sheet is intended to be consumed at the picture indices emitted by the shared PCE definitions.
+The binary header confirmation adds independent evidence that base and LP1 ordinary full sheets share the exact 640x480/24-bit/uncompressed storage geometry and payload length. It does not, by itself, prove every pixel coordinate is semantically identical; the PCE/map/resource architecture is the stronger semantic argument.
 
-This is substantially stronger evidence for semantic index preservation than equal dimensions alone. A direct loader-code trace or binary image comparison would still be useful as an independent confirmation, but there is no evidence supporting arbitrary LP1 index remapping or sparse overrides.
+## OpenAargon alignment
 
-## OpenAargon alignment check
+`src/main/resources/legacy/styles/lp1.csv` contains only its header/comments and **no override rows**. Missing entries intentionally fall back to shared `legacy/render-map.csv`.
 
-Read `src/main/resources/legacy/styles/lp1.csv`. It contains only the header plus documentation comments and **no override rows**. Its comments explicitly state that missing entries fall back to `legacy/render-map.csv` and that only entries verified against original LP1 assets should be added.
-
-Read `src/main/resources/legacy/render-map.csv` and checked representative mappings used by the real LP1 sample level:
+Representative verified shared mappings:
 
 ```text
 TOKEN O / code 79 -> coin   -> atlas=base
 TOKEN S / code 83 -> source -> atlas=base
+TOKEN p / code 112 -> spaceship -> atlas=exp1
 ```
 
-The Coin rows use the same animation start indices present in `coin.pce` (for example 280, 90, 71, 110, 62, 129, ...). The Source rows use the same animation starts present in `source.pce` (20, 32, 12, 16, 24, 136, 28, 36). The same render map also keeps explicit expansion pieces such as Spaceship on `atlas=exp1`.
+Coin animation starts match `coin.pce` (including 280, 90, 71, 110, 62, 129, ...). Source starts match `source.pce` (20, 32, 12, 16, 24, 136, 28, 36). Explicit expansion pieces remain on `exp1`.
 
-Therefore the current OpenAargon behavior is aligned with the original resource contract established above: LP1-specific style selection can replace the `base` atlas while shared render-map indices remain unchanged; explicit `exp1`/`exp2` mappings do not get redirected to LP1. No LP1-specific CSV rows are required to achieve that behavior for the verified examples.
+Thus current OpenAargon behavior matches the verified original contract: when LP1 is active, shared PCE-derived `atlas=base` indices are retained while the selected base atlas becomes LP1; explicit expansion mappings are not redirected.
 
 ## PCE inventory checkpoint
 
-Authoritative `Pieces/` listing contains 29 `.pce` files. `blank.pce` documents defaults:
+Authoritative shared `Pieces/` listing contains 29 `.pce` files. A preliminary spoken count of 27 was corrected after enumeration.
 
-```text
-TilesFile default:      black_tiles.bmp
-SmallTilesFile default: black_tiles_small.bmp
-```
-
-Direct reads/classifications so far:
+Directly read/classified:
 
 ```text
 blackhole.pce   explicit exp1
 blank.pce       format/default documentation
 brick.pce       ordinary/default; TOKEN #
-coin.pce        ordinary/default; TOKEN O; directly used by LP1 Level_001
+coin.pce        ordinary/default; TOKEN O; used by LP1 Level_001
 complex.pce     explicit exp1
-convert.pce     ordinary/default
+convert.pce     ordinary/default; indices 260..267
 double.pce      ordinary/default
 doubleslit.pce  ordinary/default
-explosion.pce   animation list only; no [FLAGS], intentionally unclassified
-source.pce      ordinary/default; TOKEN S; directly used by LP1 Level_001
-spaceship.pce   explicit exp1; TOKEN p; contrast case
+explosion.pce   animation-list-only; no [FLAGS], intentionally unclassified
+source.pce      ordinary/default; TOKEN S; used by LP1 Level_001
+spaceship.pce   explicit exp1; TOKEN p
+selector.pce    explicit exp1; TOKEN I; fully resolved
 ```
 
-The inventory is intentionally incomplete because the higher-value architectural/token proof resolved the original LP1 base-index question without requiring all 29 files to be classified. If a future investigation needs exhaustive PCE coverage, resume from the remaining files rather than assuming they were read.
+`convert.pce` is important because its ordinary/default indices are in the 260s: index magnitude must not be used to infer atlas family.
+
+The inventory remains intentionally incomplete. If independent provenance/pixel confirmation remains unavailable and more assurance is needed, the next fallback is to sample additional real LP1 map tokens and read their corresponding shared PCEs; exhaustive classification of all 29 files is secondary.
 
 ## Current conclusion
 
-For the question that motivated this pass — whether shared `atlas=base` picture indices should generally be remapped for LP1 — the evidence currently says **no**. The original asset structure and real LP1 level data support index preservation with a pack-local replacement of the ordinary `black_tiles.bmp`. OpenAargon's existing fallback model already implements that structure.
+For the motivating question — whether shared `atlas=base` picture indices should generally be remapped for LP1 — current evidence says **no**.
 
-Do not add speculative rows to `styles/lp1.csv`. A future LP1 override should require evidence of a **specific semantic slot deviation**, not merely a visual difference between `base.png` and `lp1.png`.
+The original asset/resource architecture, real LP1 map tokens, shared PCE definitions, repeated pack-local ordinary-sheet convention, OpenAargon mapping alignment, and now directly decoded BMP headers all support **index preservation with pack-local replacement of the ordinary sheet**.
 
-Independent confirmation still worth pursuing if binary access becomes available:
-- compare original LP1 `black_tiles.bmp` directly with OpenAargon's `lp1.png` for coordinate preservation;
-- inspect BMP headers, including LP3's +2-byte variant;
-- locate original active-pack resource lookup code/strings if a readable binary/source path becomes available.
+Do not add rows to `styles/lp1.csv` unless a specific semantic index deviation is proven.
+
+Useful remaining independent checks, in priority order:
+
+1. Direct pixel/coordinate comparison of original LP1 `black_tiles.bmp` against OpenAargon's `lp1.png` if complete binary transfer becomes practical.
+2. Locate original active-pack resource lookup code/strings if a readable executable/source path becomes available.
+3. Decode LP3 BMP headers to explain the +2-byte exception (useful sanity check, not required for LP1 conclusion).
+4. Sample more LP1 level tokens across skills and classify their PCE atlas selection if stronger corpus coverage is desired.
 
 ## Action log — 2026-10-18
 
-This log is intended to include successful checks, negative searches, corrections, and failed tool/environment attempts so a future session does not unknowingly repeat them.
+This log intentionally includes successful checks, negative searches, corrections, and failed tool/environment attempts.
 
-- Resumed `linux-modernization`; read and continuously updated this note before/after investigation batches.
-- Corrected initial bad repo owner probe (`OpenAargon/OpenAargon` returned 404); correct repo is `Mateozaur/OpenAargon`.
-- Read branch metadata and recursively inspected the Collector's Edition tree; searched for `black_tiles`, `PACK.INI`, and `Pieces/` paths.
-- Attempted shallow local clone/checkout for deterministic local `find`/`rg`; failed before usable checkout because the execution environment could not resolve `github.com`. No project state changed.
-- Switched back to the connected GitHub API and enumerated CE root, `Level Packs/`, LP1 root, shared `Pieces/`, LP1 `Pictures/`, and shared/root `Pictures/`.
-- Fetched LP1 `PACK.INI`; confirmed it contains no picture/tile/search-path configuration.
-- Recorded the shared ordinary/expansion `black_tiles*` family with blob IDs and sizes.
-- Confirmed LP1 has pack-local ordinary `black_tiles.bmp` / `black_tiles_small.bmp`, same sizes as base but different blobs.
-- Explicitly checked LP1 `Pictures/` for `black_tiles_exp*`; none are present, so LP1 supplies no pack-local expansion sheets.
-- Retrieved the authoritative `Pieces/` listing. Corrected a preliminary spoken count from 27 to 29 after enumerating the names.
-- Ran indexed GitHub code search for `TILESFILE`; it returned zero results despite direct declarations in PCE files, so the result was classified as a search-index limitation rather than evidence of absence.
-- Direct-read PCE batch 1: `blackhole.pce`, `blank.pce`, `brick.pce`.
-- Direct-read PCE batch 2: `coin.pce`, `complex.pce`, `convert.pce`.
-- Noted that `convert.pce` uses ordinary defaults despite picture indices in the 260s; index magnitude must not be used to infer atlas family.
-- Direct-read PCE batch 3: `double.pce`, `doubleslit.pce`, `explosion.pce`; kept `explosion.pce` unclassified because it has no `[FLAGS]` section.
-- Searched repository/indexed source for literal `Level Packs` and `LevelPack`; no actionable loader source was returned. Negative result is treated as source/index availability limitation, not proof that lookup logic does not exist.
-- Re-enumerated sibling Level Packs and their `Pictures/` directories.
-- Confirmed LP2, LP3, and LP4 also ship same-named pack-local `black_tiles.bmp` / `black_tiles_small.bmp` pairs.
-- Recorded LP3's exact +2-byte exception for both ordinary sheets instead of generalizing all packs as byte-size-identical.
-- Attempted direct binary blob read of shared/base `black_tiles.bmp` to inspect BMP headers. The GitHub connector failed with `UnicodeDecodeError` while decoding binary as UTF-8; no header bytes were returned and no project state changed.
-- Enumerated LP1 `Levels/` and confirmed `Skill1`-`Skill4` directories.
-- Enumerated LP1 `Levels/Skill1/` and identified its `Level_###.map` files.
-- Fetched `Skill1/Level_001.map`; confirmed token-map format and absence of atlas/index/remap metadata.
-- Re-read `brick.pce`, `source.pce`, `coin.pce`, and `spaceship.pce` to correlate actual LP1 map tokens and contrast ordinary/default vs explicit exp1 selection.
-- Confirmed real LP1 token `O` resolves through shared `coin.pce` ordinary/default and token `S` through shared `source.pce` ordinary/default; confirmed `spaceship.pce` token `p` explicitly selects exp1.
-- Fetched current `styles/lp1.csv`; confirmed it contains no override rows and intentionally relies on fallback to the shared render map.
-- Fetched `render-map.csv`; confirmed Coin (`79`) and Source (`83`) are mapped to `atlas=base` using their PCE-derived indices, while expansion pieces remain on explicit expansion atlases.
-- Searched the fetched render-map response for Source rows to verify the full Source animation-start sequence and adjacent Spaceship `exp1` mapping.
-- Recorded the conclusion that current OpenAargon fallback behavior matches the verified original LP1 resource/index contract; no new LP1 mapping rows are justified by current evidence.
-- No `styles/lp1.csv` or functional code changes were made during this investigation; only recovery/documentation notes were updated.
+- Resumed `linux-modernization`; maintained this note as the hand-off source of truth.
+- Corrected initial wrong repo-owner probe (`OpenAargon/OpenAargon`); correct repository is `Mateozaur/OpenAargon`.
+- Inventoried CE tree, LP1 `PACK.INI`, shared/pack-local tile sheets, sibling Level Packs, shared PCE directory, and LP1 level directories.
+- Attempted shallow local clone/checkout for deterministic local `find`/`rg`; environment could not resolve `github.com`, so no usable clone was created and project state was unchanged.
+- Switched back to connected GitHub API.
+- Confirmed LP1-LP4 all ship pack-local same-named ordinary `black_tiles` pairs; recorded LP3's +2-byte exception.
+- Confirmed LP1 has no local `black_tiles_exp*` files.
+- Read `blank.pce` default-sheet documentation and multiple PCE batches; classified files listed above.
+- Corrected preliminary PCE count from 27 to authoritative 29.
+- Recorded `convert.pce` as ordinary/default despite high picture indices, ruling out atlas inference from index range.
+- Indexed searches for `TILESFILE`, `Level Packs`, and `LevelPack` failed to expose loader source despite known data; classified as search-index/source-availability limitations.
+- Initial binary BMP blob fetch failed with `UnicodeDecodeError`; no bytes were returned by that path.
+- Enumerated LP1 `Skill1`-`Skill4`; fetched `Skill1/Level_001.map` and confirmed token-map format without atlas/index/remap metadata.
+- Re-read `brick.pce`, `source.pce`, `coin.pce`, `spaceship.pce`; correlated actual LP1 `O`/`S` tokens with ordinary defaults and `p` with explicit exp1.
+- Fetched `styles/lp1.csv`; confirmed no rows and fallback-to-shared-map intent.
+- Fetched/searched `render-map.csv`; confirmed Coin/Source shared-PCE indices under `atlas=base` and expansion pieces under explicit expansion atlases.
+- Recorded no-override/index-preservation conclusion.
+- Finalized hand-off checkpoint in commit `49fa9e3046215d54230b2994ca1b3e3efcbd9b89` before continuing.
+- Re-read branch head before continuation; it was `49fa9e3046215d54230b2994ca1b3e3efcbd9b89`.
+- Fetched introduction commit `2e50ecbe87b3907095cfcf1ff77e82ec8f12d8e8` and its raw commit metadata; confirmed all legacy PNG atlases were added together, `LegacyTileSet.LEVEL_PACK_1` is 20x15, and the single parent is `98625d829872afc6a3aad6a6c89bef0261781079`.
+- Fetched the parent commit; it only changes border T-junction rendering and provides no atlas-conversion provenance.
+- Ran commit searches for `legacy`, `Collector`, `rendering support`, `BMP`, `atlas`, `lp1`, and `Collector's Edition`; connector returned no results even though the known introduction commit matches several terms, so commit-search output is not trusted as absence evidence.
+- Ran indexed repository searches for `black_tiles.bmp` and likely ImageMagick/convert/png/bmp provenance; no useful results; likewise treated as index limitation.
+- Retried LP1 BMP access with `fetch_file` base64 mode; succeeded and confirmed ranged reads are possible.
+- Decoded LP1 full ordinary BMP header: 640x480, 24-bit, BI_RGB/uncompressed, 54-byte pixel offset, 921600-byte pixel payload, 921654-byte file.
+- Decoded shared/base full ordinary BMP header: same structural geometry/payload; only X/Y resolution metadata differs (5176 base vs 5272 LP1).
+- Promoted the previous 54+640*480*3 size equation from hypothesis to confirmed BMP-header fact for base and LP1 full ordinary sheets.
+- Tested line-ranged base64 access. It works, but reconstructing complete BMP + compressed PNG through chat-sized chunks is impractical; direct pixel comparison remains outstanding.
+- No functional code and no `styles/lp1.csv` mapping rows have been changed; only this recovery note has been updated.
 
 ## Session checkpoint / notes commits
 
-This resumed investigation started from the existing branch state around `b74ac775a35251dcfcac8ed9f52c4fde81558f9f`. The first explicit hand-off checkpoint requested before further work was committed as:
+Known recovery-note checkpoints from this work include:
 
 ```text
 9695a790  Checkpoint LP1 recovery investigation
-```
-
-Subsequent recovery-note checkpoints were written continuously while the investigation progressed. Known commits from this pass include:
-
-```text
 288e99d6  recovery-note update during asset/PCE audit
 6c99fcf3  record LP1-LP4 pack-local tile-sheet evidence
 2ac74af3  record BMP binary-reader limitation
 822df309  record LP1 level-format evidence
 0268560d  record shared-PCE token correlation
 26eda22c  record OpenAargon alignment and no-override conclusion
+49fa9e30  Finalize LP1 recovery handoff checkpoint
 ```
 
-Some intermediate note commits may have additional full-length SHAs in branch history; the action log above, rather than commit messages alone, is the authoritative list of investigation actions and conclusions.
-
-### Completeness checkpoint before the next large step
-
-As of this checkpoint, the note explicitly preserves:
-
-- the safety rule against guessed LP1 overrides;
-- the Selector/exp1 resolution and DLL dead ends from prior work;
-- original CE asset-tree availability and atlas provenance gap;
-- LP1 `PACK.INI` contents and the negative result that it does not configure tile lookup;
-- shared/base and LP1-LP4 ordinary tile-sheet names, sizes, blob identities, LP1 lack of local expansion sheets, and LP3's +2-byte exception;
-- the failed local clone/DNS attempt and failed binary BMP/UTF-8 attempt;
-- indexed-search limitations and the corrected PCE file count;
-- every PCE file directly read/classified in this pass and the fact that the 29-file inventory was not completed;
-- representative real LP1 level token evidence (`O`, `S`) and the explicit exp1 contrast (`p`/Spaceship);
-- the OpenAargon `lp1.csv`/`render-map.csv` alignment check;
-- the final technical conclusion that existing shared indices should be preserved for LP1 and no new `styles/lp1.csv` rows are justified without a proven semantic deviation;
-- remaining independent-validation avenues if binary/provenance access becomes possible.
-
-No known material action or conclusion from this resumed pass is intentionally left only in chat state.
+The action log is authoritative; intermediate note commits may have additional hashes/messages in branch history.
 
 ## Resume here
 
-The LP1 base-index question is now provisionally resolved in favor of **index preservation**: real LP1 maps use shared PCE token definitions; ordinary PCE definitions use logical `black_tiles.bmp`; every original Level Pack supplies a same-named pack-local ordinary sheet; LP1 supplies no expansion replacement or alternate PCE/remap table; and OpenAargon's current `atlas=base` fallback preserves those PCE-derived indices while switching the selected base atlas.
+The LP1 base-index question remains provisionally resolved in favor of **index preservation**, now with an additional independent binary-header confirmation that base and LP1 ordinary full sheets share the same 640x480, 24-bit uncompressed geometry and exact pixel payload length.
 
-Do not add LP1 overrides unless a specific index is proven semantically different. If continuing this investigation, prioritize independent binary/provenance confirmation rather than expanding speculative mappings. The incomplete PCE inventory is available as a secondary route if such confirmation remains unavailable.
+Do not add LP1 overrides unless a specific index is proven semantically different.
+
+Next best attempt: either obtain a practical complete-binary path and compare LP1 BMP vs `lp1.png` coordinates, or sample additional real LP1 maps/tokens across skills and verify their PCE-selected atlas families. The incomplete PCE inventory is a secondary fallback, not a reason to invent mappings.
 
 ```text
 Repository: Mateozaur/OpenAargon
