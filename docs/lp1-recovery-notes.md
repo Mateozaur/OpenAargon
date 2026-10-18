@@ -65,18 +65,27 @@ LP1 contains no `black_tiles_exp*` files. Thus LP1 overrides only the ordinary p
 
 LP1 ordinary sheets exactly match base ordinary sheets in byte size but differ in blob identity. This is strong structural evidence for same-shape content replacement, but not yet proof of semantic slot preservation.
 
-### Repeated pack-local convention
+### Repeated pack-local convention across all four level packs
 
-Level Pack 2 also contains the same ordinary filenames in its own `Pictures/` directory:
+All four original Level Packs ship same-named ordinary tile sheets under their own `Pictures/` directories:
 
 ```text
-Level Packs/Level Pack 2/Pictures/black_tiles.bmp
-  921654 bytes  1c049d0baf5de562518ac4df894dc2bb5be7c4b4
-Level Packs/Level Pack 2/Pictures/black_tiles_small.bmp
-   57654 bytes  fb9fd458550f87cc3696e980277813b9bf10e809
+Level Pack 1 black_tiles.bmp        921654  768d05581ab0a2a39beb9e29c492e869d07eb2fe
+Level Pack 1 black_tiles_small.bmp   57654  e27ac267529a3f56020508c07775414f114a4032
+
+Level Pack 2 black_tiles.bmp        921654  1c049d0baf5de562518ac4df894dc2bb5be7c4b4
+Level Pack 2 black_tiles_small.bmp   57654  fb9fd458550f87cc3696e980277813b9bf10e809
+
+Level Pack 3 black_tiles.bmp        921656  a6bb5fe81ddbb399640a051a5459bd66bdbafa0a
+Level Pack 3 black_tiles_small.bmp   57656  f039e588b1af4a0bc4af90ac4a3cd20454889ec6
+
+Level Pack 4 black_tiles.bmp        921654  3f63fff739958dc1473564d083d6dc725c52eacf
+Level Pack 4 black_tiles_small.bmp   57654  97dbb2e35c8eb67c3b0e9f6e7bcd76fc6d08fddc
 ```
 
-These sizes again exactly match the shared/base ordinary sheets while the blobs differ. The repeated directory/name/size pattern across LP1 and LP2 is strong evidence that same-named pack-local ordinary tile sheets are an intentional level-pack resource convention, not an LP1 accident. It still does not alone prove lookup precedence or semantic slot identity.
+The repeated directory and filename convention across LP1-LP4 is very strong architectural evidence that active Level Packs intentionally supply their own ordinary `black_tiles` resources. LP1, LP2 and LP4 have the same byte sizes as the shared/root pair. LP3 is a deliberate caveat: both LP3 files are exactly two bytes larger than the corresponding shared/other-pack files. Therefore do **not** claim that every pack uses a byte-identical BMP format merely from file size. Inspect BMP headers/dimensions before drawing format conclusions.
+
+This repeated convention is still not direct code-level proof of lookup precedence and is not, by itself, proof that each tile index keeps the same semantic meaning. It does make accidental LP1 duplication extremely unlikely.
 
 ## LP1 PACK.INI
 
@@ -129,7 +138,7 @@ GitHub code search for `TILESFILE` returned zero indexed results despite direct 
 ## Current open questions
 
 1. What general loader/search-path behavior makes active-pack `Pictures/black_tiles.bmp` shadow the shared/base sheet?
-2. Do Level Packs 3 and 4 repeat the LP1/LP2 same-named ordinary-sheet convention?
+2. What explains LP3's +2-byte BMP size difference, and do all ordinary sheets nevertheless have the same image dimensions/grid geometry?
 3. Complete remaining direct `.pce` classifications.
 4. Do LP1 ordinary tile slots preserve the semantic ordering expected by shared PCE picture indices?
 5. Does OpenAargon's `lp1.png` directly correspond to LP1's pack-local `black_tiles.bmp` with coordinates/order preserved?
@@ -154,16 +163,19 @@ GitHub code search for `TILESFILE` returned zero indexed results despite direct 
 - Searched repo code for `Level Packs` and `LevelPack`; both returned zero indexed source results.
 - Probed earlier recursive tree for `LevelPack`; no actionable loader-source evidence found.
 - Re-enumerated `Level Packs/` to identify sibling packs for structural comparison.
-- Enumerated `Level Pack 2/Pictures/` and searched returned inventory for `black_tiles`.
-- Confirmed LP2 also supplies pack-local `black_tiles.bmp` (921654 bytes, blob `1c049d0b...`) and `black_tiles_small.bmp` (57654 bytes, blob `fb9fd458...`).
+- Enumerated `Level Pack 2/Pictures/` and searched returned inventory for `black_tiles`; confirmed LP2 pack-local ordinary pair.
+- Enumerated `Level Pack 3/Pictures/` and searched its returned inventory for `black_tiles`.
+- Confirmed LP3 pack-local `black_tiles.bmp` (921656 bytes, `a6bb5fe8...`) and `black_tiles_small.bmp` (57656 bytes, `f039e588...`). Noted the exact +2-byte difference from shared/LP1/LP2/LP4 equivalents rather than treating all pack BMPs as byte-size-identical.
+- Enumerated `Level Pack 4/Pictures/` and searched its returned inventory for `black_tiles`.
+- Confirmed LP4 pack-local `black_tiles.bmp` (921654 bytes, `3f63fff7...`) and `black_tiles_small.bmp` (57654 bytes, `97dbb2e3...`).
+- Concluded structurally that all four original Level Packs intentionally carry same-named ordinary tile sheets in pack-local `Pictures/`; this is strong evidence for an active-pack resource-shadowing convention, with lookup precedence and semantic slot preservation still requiring proof.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
 
 ## Resume here
 
-The strongest new evidence is now architectural: LP1 and LP2 both ship same-named ordinary tile sheets in pack-local `Pictures/`, with exactly the shared/base sizes but distinct content blobs, while LP1 does not override expansion sheets. Next check LP3/LP4 for the same convention, then continue PCE inventory and semantic slot validation. Do not add LP1 mapping overrides until a deviation is proven.
+All LP1-LP4 packs now confirm the same pack-local ordinary `black_tiles` naming convention. LP3's pair is +2 bytes, so the next highest-value check is the BMP header/geometry for shared base, LP1, and LP3 (then LP4 if useful): width, height, bits-per-pixel, pixel-data offset, compression/header type. After that, correlate LP1's original BMP with OpenAargon's `lp1.png` to test whether conversion preserved pixel coordinates/tile order. Continue the PCE inventory after this higher-value provenance check. Do not add LP1 mapping overrides until a semantic deviation is proven.
 
 ```text
 Repository: Mateozaur/OpenAargon
 Branch: linux-modernization
-Latest notes commit before LP3/LP4 check: ca3904958749b55685d7cbf1e2d18d7e74b422bc
 ```
