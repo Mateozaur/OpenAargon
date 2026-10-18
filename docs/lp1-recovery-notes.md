@@ -69,6 +69,8 @@ Aargon Deluxe Collectors Edition 1.4.CE/Level Packs/Level Pack 1/Pictures/black_
   size: 57654 bytes
 ```
 
+An explicit search of the LP1 `Pictures/` inventory for `black_tiles_exp` returned no matches. LP1 therefore overrides the ordinary pair only; it does not supply pack-local `exp1`/`exp2` tile sheets. This supports the renderer model in which the current style supplies `base`, while `exp1` and `exp2` remain shared atlases.
+
 The shared/root `Pictures/` directory contains the complete ordinary/expansion tile-sheet family:
 
 ```text
@@ -95,10 +97,10 @@ black_tiles_small_exp2.bmp
 The LP1 ordinary sheets have **exactly the same byte sizes** as the corresponding shared/base ordinary sheets while having **different blob identities**:
 
 ```text
-base black_tiles.bmp      921654 bytes  2c1cebca...
-LP1  black_tiles.bmp      921654 bytes  768d0558...
-base black_tiles_small.bmp 57654 bytes  f12083c9...
-LP1  black_tiles_small.bmp 57654 bytes  e27ac267...
+base black_tiles.bmp       921654 bytes  2c1cebca...
+LP1  black_tiles.bmp       921654 bytes  768d0558...
+base black_tiles_small.bmp  57654 bytes  f12083c9...
+LP1  black_tiles_small.bmp  57654 bytes  e27ac267...
 ```
 
 This is strong structural evidence that LP1 replaces the visual content of the ordinary sheet while retaining the same BMP dimensions/format footprint and therefore the same grid capacity. It still does **not** by itself prove that every tile slot keeps the same semantic meaning; that needs lookup/slot validation.
@@ -126,10 +128,9 @@ IsEmpty=false
 ## Next validation steps
 
 1. Inventory `Pieces/*.pce` `TILESFILE` / `SmallTILESFILE` declarations.
-2. Check explicitly whether LP1 `Pictures/` contains any pack-local `black_tiles_exp1*` / `black_tiles_exp2*`; absence would support shared expansion-atlas behavior.
-3. Trace original resource/search-path behavior from configuration/code/assets; `PACK.INI` itself has now been ruled out as the place where tile lookup is configured.
-4. Correlate LP1 BMP with OpenAargon `lp1.png`; only if provenance is insufficient, compare cells on the 20x15 grid against PCE indices.
-5. Add `styles/lp1.csv` rows only for verified deviations. If slot semantics are preserved, the correct result may be no additional LP1 overrides.
+2. Trace original resource/search-path behavior from configuration/code/assets; `PACK.INI` itself has now been ruled out as the place where tile lookup is configured.
+3. Correlate LP1 BMP with OpenAargon `lp1.png`; only if provenance is insufficient, compare cells on the 20x15 grid against PCE indices.
+4. Add `styles/lp1.csv` rows only for verified deviations. If slot semantics are preserved, the correct result may be no additional LP1 overrides.
 
 ## Existing relevant commits
 
@@ -160,12 +161,13 @@ b21842799933df839472c8dd81fae84adc0c824e  create initial recovery notes
 - Fetched the shared/root `Aargon Deluxe Collectors Edition 1.4.CE/Pictures/` directory and filtered its returned inventory for `black_tiles`.
 - Recorded all six shared tile-sheet files (`ordinary`, `exp1`, `exp2`, and their `small` variants) with exact blobs and sizes.
 - Compared shared ordinary sheets with LP1 ordinary sheets: both full-size files are 921654 bytes and both small files are 57654 bytes, but each LP1 file has a different blob from its shared counterpart. Recorded this as structural evidence of same-shape content replacement, not yet semantic index proof.
+- Searched the LP1 `Pictures/` inventory explicitly for `black_tiles_exp`; the search returned zero matches. Recorded that LP1 overrides only the ordinary pair and leaves expansion atlases shared.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
-- Next action: explicitly test LP1 `Pictures/` for expansion-sheet names, then begin the shared PCE `TILESFILE` inventory.
+- Next action: begin the shared PCE `TILESFILE` / `SmallTILESFILE` inventory.
 
 ## Resume here
 
-LP1 definitely has pack-local ordinary tile sheets, and those sheets match the shared ordinary sheets in byte size while differing in content blob. `PACK.INI` does not explicitly select them. Resume by checking whether LP1 overrides expansion sheets, then inventory shared PCE `TILESFILE` declarations and trace the general active-pack lookup path. The main remaining proof burden is semantic slot/index preservation, not sheet existence or dimensions.
+LP1 definitely has pack-local ordinary tile sheets, and those sheets match the shared ordinary sheets in byte size while differing in content blob. LP1 has no pack-local `black_tiles_exp*` files. `PACK.INI` does not explicitly select the ordinary sheets. Resume with the shared PCE `TILESFILE` declarations and then trace general active-pack lookup. The main remaining proof burden is semantic slot/index preservation.
 
 ```text
 Repository: Mateozaur/OpenAargon
