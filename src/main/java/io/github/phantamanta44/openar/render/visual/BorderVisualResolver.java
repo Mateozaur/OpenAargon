@@ -43,10 +43,12 @@ public final class BorderVisualResolver {
      * layout coordinates of the LP1 style resource, not as runtime PCE lookup
      * semantics.
      *
-     * The T-junction aliases deliberately mirror OpenAargon's historical native
-     * border normalization: south/north junctions use the semantic equivalents
-     * of variants 4/5. This is important for SELECTOR's two X/WHITE separator
-     * cells, where topology overrides the stored legacy rotation.
+     * SELECTOR's two separator junctions are intentionally mapped independently
+     * from the ordinary top/bottom frame variants. In the source map the upper
+     * X/WHITE separator cell carries legacy orientation 2 and the lower one
+     * carries orientation 1; those historically select LP1 resource cells 97
+     * and 59 respectively. We preserve that concrete visual evidence here while
+     * exposing only TEE_SOUTH / TEE_NORTH to the rest of the renderer.
      */
     private static SpriteDefinition resolveLp1(BorderVisualVariant variant) {
         final int tile;
@@ -76,10 +78,10 @@ public final class BorderVisualResolver {
                 tile = 78;
                 break;
             case TEE_SOUTH:
-                tile = 118;
+                tile = 97;
                 break;
             case TEE_NORTH:
-                tile = 58;
+                tile = 59;
                 break;
             default:
                 return null;
