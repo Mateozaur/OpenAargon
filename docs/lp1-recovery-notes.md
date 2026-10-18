@@ -99,7 +99,7 @@ IsEmpty=false
 
 ## PCE inventory checkpoint
 
-The shared `Pieces/` directory contains exactly 27 `.pce` files:
+The authoritative shared `Pieces/` directory listing contains **29** `.pce` files:
 
 ```text
 blackhole.pce blank.pce brick.pce coin.pce complex.pce convert.pce
@@ -109,20 +109,37 @@ refractor.pce selector.pce slime.pce source.pce spaceship.pce splicer.pce
 splitter.pce threeway.pce tnt.pce water.pce wood.pce
 ```
 
-Correction: the list above contains 29 names, not 27; use the directory listing itself as authoritative and recount before recording a final count. This note intentionally records the discrepancy rather than silently trusting the preliminary count.
+The earlier spoken count of 27 was wrong; it has been corrected to 29 from the enumerated list.
 
-A repository code-search query for `TILESFILE` scoped to this directory returned zero results. This is an indexing/search limitation already observed earlier and is **not** evidence that declarations are absent. The inventory must therefore read the `.pce` files directly.
+A repository code-search query for `TILESFILE` scoped to this directory returned zero results. This is an indexing/search limitation and is not evidence that declarations are absent. Files are being read directly instead.
+
+`blank.pce` contains the PCE format documentation and establishes these defaults when a piece omits the flags:
+
+```text
+TilesFile default:      black_tiles.bmp
+SmallTilesFile default: black_tiles_small.bmp
+```
+
+Direct inventory progress:
+
+```text
+blackhole.pce  explicit exp1: black_tiles_exp1.bmp / black_tiles_small_exp1.bmp
+blank.pce      no explicit override; documents ordinary defaults above
+brick.pce      no explicit TilesFile/SmallTilesFile -> ordinary defaults
+```
+
+Thus omission of `TilesFile` is positive evidence for use of the ordinary `black_tiles.bmp`, not an unknown value.
 
 ## Current open questions
 
 1. What general loader/search-path code makes pack-local `Pictures/black_tiles.bmp` shadow the shared/base sheet?
-2. What are all `TILESFILE` / `SmallTILESFILE` values across `Pieces/*.pce` (base vs exp1/exp2)?
+2. Complete the remaining 26 direct `.pce` reads and classify each as ordinary/default, exp1, or exp2.
 3. Do LP1 `black_tiles.bmp` tile slots preserve the semantic ordering expected by shared PCE picture indices?
 4. Does OpenAargon's `lp1.png` correspond directly to LP1's pack-local `black_tiles.bmp`, with ordering preserved?
 
 ## Next validation steps
 
-1. Recount the `.pce` directory from the authoritative listing and read every file directly for `TILESFILE` / `SmallTILESFILE`.
+1. Continue direct `.pce` reads in batches and record each batch before proceeding.
 2. Trace original resource/search-path behavior from configuration/code/assets; `PACK.INI` itself has now been ruled out as the place where tile lookup is configured.
 3. Correlate LP1 BMP with OpenAargon `lp1.png`; only if provenance is insufficient, compare cells on the 20x15 grid against PCE indices.
 4. Add `styles/lp1.csv` rows only for verified deviations. If slot semantics are preserved, the correct result may be no additional LP1 overrides.
@@ -150,14 +167,18 @@ b21842799933df839472c8dd81fae84adc0c824e  create initial recovery notes
 - Confirmed LP1 contains pack-local ordinary `black_tiles.bmp` / `black_tiles_small.bmp`, equal in byte size but different in blob identity from the shared ordinary pair.
 - Confirmed LP1 contains no `black_tiles_exp*` files; expansion sheets remain shared.
 - Fetched LP1 `PACK.INI`; confirmed it contains no picture/tile/search-path configuration.
-- Retrieved the authoritative `Pieces/` directory listing and extracted all `.pce` names. A preliminary spoken count of 27 conflicted with the enumerated name list (29 names); this discrepancy is logged and will be corrected by recounting before conclusions.
-- Ran GitHub repository code search for `TILESFILE` scoped to the CE `Pieces` directory; it returned zero results. Because direct file evidence already proves `TILESFILE` exists (e.g. Selector), the zero result is treated only as a search-index limitation.
+- Retrieved the authoritative `Pieces/` directory listing. Corrected preliminary count from 27 to 29 after recounting the enumerated names.
+- Ran GitHub repository code search for `TILESFILE` scoped to the CE `Pieces` directory; it returned zero results and was classified as a search-index limitation.
+- Directly fetched `blackhole.pce`, `blank.pce`, and `brick.pce`.
+- Recorded `blackhole.pce` as explicit `exp1`.
+- Recorded from `blank.pce` that omitted `TilesFile` / `SmallTilesFile` defaults are `black_tiles.bmp` / `black_tiles_small.bmp`.
+- Recorded `brick.pce` as ordinary/default because it omits both file flags.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
-- Next action: recount the authoritative `.pce` list, then fetch the files directly in batches and record their tile-sheet declarations.
+- Next action: fetch the next PCE batch (`coin`, `complex`, `convert`, then continue alphabetically) and append classifications.
 
 ## Resume here
 
-LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. GitHub code search cannot be trusted for PCE declarations. Resume by direct per-file PCE reads, recording each batch before moving on, then trace active-pack lookup. The main remaining proof burden is semantic slot/index preservation.
+LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. Direct PCE inventory has started and establishes that omitted tile-file flags mean the ordinary pair. Continue alphabetically from `coin.pce`, recording every batch, then trace active-pack lookup and semantic slot preservation.
 
 ```text
 Repository: Mateozaur/OpenAargon
