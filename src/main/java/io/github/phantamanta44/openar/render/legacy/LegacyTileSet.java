@@ -1,5 +1,7 @@
 package io.github.phantamanta44.openar.render.legacy;
 
+import io.github.phantamanta44.openar.game.piece.VisualStyleId;
+
 import java.io.File;
 import java.util.Locale;
 
@@ -14,18 +16,21 @@ public enum LegacyTileSet {
     HOTTER("hotter", "texture/legacy/hotter.png", 20, 15);
 
     private final String id;
+    private final VisualStyleId visualStyleId;
     private final String texturePath;
     private final int columns;
     private final int rows;
 
     LegacyTileSet(String id, String texturePath, int columns, int rows) {
         this.id = id;
+        this.visualStyleId = VisualStyleId.of(id);
         this.texturePath = texturePath;
         this.columns = columns;
         this.rows = rows;
     }
 
     public String getId() { return id; }
+    public VisualStyleId getVisualStyleId() { return visualStyleId; }
     public String getTexturePath() { return texturePath; }
     public int getColumns() { return columns; }
     public int getRows() { return rows; }
