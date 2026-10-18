@@ -120,18 +120,31 @@ Pieces/spaceship.pce (contrast case)
   SmallTilesFile = black_tiles_small_exp1.bmp
 ```
 
-`brick.pce` was also re-read during this correlation pass: it has `TOKEN = #`, no tile-file override, and therefore uses the ordinary defaults. `#` is not one of the representative LP1 `Level_001.map` tokens being used for this particular proof, but the read reconfirms the ordinary/default behavior.
+`brick.pce` has `TOKEN = #`, no tile-file override, and therefore uses ordinary defaults.
 
-This is important evidence: an actual LP1 level uses shared PCE tokens whose shared definitions select the **ordinary logical filename** by default, while LP1 provides its own same-named `Pictures/black_tiles.bmp` and has no alternate PCE/index table. Expansion use remains explicit inside shared PCE definitions (e.g. `spaceship.pce` and previously `selector.pce`), and LP1 does not supply pack-local expansion sheets.
-
-The combined data strongly supports this original-game contract:
+The combined original-game data strongly supports this resource/index contract:
 
 1. LP1 maps store shared piece tokens rather than atlas/index remaps.
-2. Shared PCE definitions convert those tokens/state into picture indices and choose ordinary vs expansion logical tile-sheet names.
-3. LP1 supplies a same-named ordinary `black_tiles.bmp` resource, while expansion sheets remain shared.
-4. Therefore LP1's ordinary sheet must be usable at the picture indices emitted by the shared PCE definitions for the original LP1 levels to render the intended pieces.
+2. Shared PCE definitions convert tokens/state into picture indices and choose ordinary vs expansion logical tile-sheet names.
+3. LP1 supplies a same-named ordinary `black_tiles.bmp`, while expansion sheets remain shared.
+4. Therefore LP1's ordinary sheet is intended to be consumed at the picture indices emitted by the shared PCE definitions.
 
-This is substantially stronger evidence for semantic index preservation than equal dimensions alone. A direct loader-code trace or binary image comparison would still be useful as an independent confirmation, but there is now no evidence supporting arbitrary LP1 index remapping or sparse overrides.
+This is substantially stronger evidence for semantic index preservation than equal dimensions alone. A direct loader-code trace or binary image comparison would still be useful as an independent confirmation, but there is no evidence supporting arbitrary LP1 index remapping or sparse overrides.
+
+## OpenAargon alignment check
+
+Read `src/main/resources/legacy/styles/lp1.csv`. It contains only the header plus documentation comments and **no override rows**. Its comments explicitly state that missing entries fall back to `legacy/render-map.csv` and that only entries verified against original LP1 assets should be added.
+
+Read `src/main/resources/legacy/render-map.csv` and checked representative mappings used by the real LP1 sample level:
+
+```text
+TOKEN O / code 79 -> coin   -> atlas=base
+TOKEN S / code 83 -> source -> atlas=base
+```
+
+The Coin rows use the same animation start indices present in `coin.pce` (for example 280, 90, 71, 110, 62, 129, ...). The Source rows use the same animation starts present in `source.pce` (20, 32, 12, 16, 24, 136, 28, 36). The same render map also keeps explicit expansion pieces such as Spaceship on `atlas=exp1`.
+
+Therefore the current OpenAargon behavior is aligned with the original resource contract established above: LP1-specific style selection can replace the `base` atlas while shared render-map indices remain unchanged; explicit `exp1`/`exp2` mappings do not get redirected to LP1. No LP1-specific CSV rows are required to achieve that behavior for the verified examples.
 
 ## PCE inventory checkpoint
 
@@ -158,12 +171,16 @@ source.pce      ordinary/default; TOKEN S; directly used by LP1 Level_001
 spaceship.pce   explicit exp1; TOKEN p; contrast case
 ```
 
-## Current open questions
+## Current conclusion
 
-1. Can active-pack lookup precedence be independently confirmed from original executable/config strings or another text-readable source?
-2. Can OpenAargon's `lp1.png` be independently tied to LP1's original `black_tiles.bmp` with coordinate/order preservation?
-3. Are there any shared ordinary-PCE indices that actually deviate semantically in LP1? Current evidence points toward preservation, not remapping.
-4. What explains LP3's +2-byte BMP size difference?
+For the question that motivated this pass — whether shared `atlas=base` picture indices should generally be remapped for LP1 — the evidence currently says **no**. The original asset structure and real LP1 level data support index preservation with a pack-local replacement of the ordinary `black_tiles.bmp`. OpenAargon's existing fallback model already implements that structure.
+
+Do not add speculative rows to `styles/lp1.csv`. A future LP1 override should require evidence of a **specific semantic slot deviation**, not merely a visual difference between `base.png` and `lp1.png`.
+
+Independent confirmation still worth pursuing if binary access becomes available:
+- compare original LP1 `black_tiles.bmp` directly with OpenAargon's `lp1.png` for coordinate preservation;
+- inspect BMP headers, including LP3's +2-byte variant;
+- locate original active-pack resource lookup code/strings if a readable binary/source path becomes available.
 
 ## Action log — 2026-10-18
 
@@ -179,13 +196,17 @@ spaceship.pce   explicit exp1; TOKEN p; contrast case
 - Enumerated LP1 `Levels/`, `Skill1/`, and fetched `Skill1/Level_001.map`; confirmed token-map format without atlas/index/remap metadata.
 - Re-read `brick.pce`, `source.pce`, `coin.pce`, and `spaceship.pce` to correlate actual LP1 map tokens and contrast ordinary/default vs explicit exp1 selection.
 - Confirmed `Level_001.map` token `O` resolves through shared `coin.pce` ordinary/default and token `S` through shared `source.pce` ordinary/default; confirmed `spaceship.pce` token `p` explicitly selects exp1.
+- Fetched current `styles/lp1.csv`; confirmed it contains no override rows and intentionally relies on fallback to the shared render map.
+- Fetched `render-map.csv`; confirmed Coin (`79`) and Source (`83`) are mapped to `atlas=base` using their PCE-derived indices, while expansion pieces remain on explicit expansion atlases.
+- Searched the fetched render-map response for Source rows to verify the full Source animation-start sequence and adjacent Spaceship `exp1` mapping.
+- Recorded the conclusion that current OpenAargon fallback behavior matches the verified original LP1 resource/index contract; no new LP1 mapping rows are justified by this evidence.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
 
 ## Resume here
 
-The strongest current result is the resource/index contract: actual LP1 levels use shared PCE tokens; ordinary shared PCE definitions emit their established indices against logical `black_tiles.bmp`; LP1 supplies that same logical filename locally and has no alternate PCE/remap table, while expansions remain explicitly separate. This strongly supports preserving existing `atlas=base` picture indices under LP1 rather than inventing LP1 overrides.
+The LP1 base-index question is now provisionally resolved in favor of **index preservation**: real LP1 maps use shared PCE token definitions; ordinary PCE definitions use logical `black_tiles.bmp`; every original Level Pack supplies a same-named pack-local ordinary sheet; LP1 supplies no expansion replacement or alternate PCE/remap table; and OpenAargon's current `atlas=base` fallback preserves those PCE-derived indices while switching the selected base atlas.
 
-Next, look for an independent confirmation of active-pack lookup precedence or PNG provenance. If none is available through text/binary limitations, finish enough PCE/token sampling to rule out an exceptional LP1 mapping mechanism, then record the conclusion that no new `styles/lp1.csv` rows are justified by current evidence.
+Do not add LP1 overrides unless a specific index is proven semantically different. If continuing this investigation, prioritize independent binary/provenance confirmation rather than expanding speculative mappings.
 
 ```text
 Repository: Mateozaur/OpenAargon
