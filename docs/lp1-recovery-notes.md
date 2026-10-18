@@ -159,4 +159,10 @@ The chat/UI warning about conversation length is not itself a project-state chan
 
 - Restarted the investigation on `linux-modernization` and read this recovery note before touching mappings or code.
 - Confirmed the working repository is `Mateozaur/OpenAargon`; an initial probe against the guessed owner `OpenAargon/OpenAargon` returned 404 and was discarded without changing project state.
-- Next action: enumerate the tracked Collector's Edition root and `Pieces/` directory directly through GitHub, then record the exact locations of `PACK.INI` and all `black_tiles*.bmp` files before inspecting their contents.
+- Requested the tracked Collector's Edition root through the GitHub contents API.
+- Read branch metadata for `linux-modernization` and obtained recursive tree data for checkpoint commit `5c39b456e2a2b0b77ac255504ffbb82d849b42bf`.
+- Searched that recursive tree for `black_tiles` paths.
+- Searched the same tree for `PACK.INI` paths.
+- Searched the same tree for `Pieces/` paths to establish the scope of the `.pce` inventory.
+- The exact inventory conclusions are intentionally not recorded yet because the next step is to reproduce the traversal locally with deterministic `find`/`rg` commands and record their exact output rather than infer from truncated connector search output.
+- Next action: obtain a local checkout of `linux-modernization`, then run exact filesystem inventories for `black_tiles*.bmp`, `PACK.INI`, and `Pieces/*.pce` `TILESFILE` / `SmallTILESFILE` declarations.
