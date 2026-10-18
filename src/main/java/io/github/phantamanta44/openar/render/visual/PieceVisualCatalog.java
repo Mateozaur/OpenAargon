@@ -94,13 +94,19 @@ public final class PieceVisualCatalog {
                 instance.getRotation());
 
         /*
-         * border.png is OpenAargon's normalized 8x2 border resource. Row zero
+         * Style-specific art is resolved from the semantic role first. This is
+         * deliberately separate from LegacyRenderResolver: concrete styles may
+         * happen to source pixels from a legacy atlas, but PCE picture numbers
+         * are not part of the PieceBorder runtime contract.
+         */
+        SpriteDefinition styled = BorderVisualResolver.resolve(style, variant);
+        if (styled != null) {
+            return styled;
+        }
+
+        /*
+         * border.png is OpenAargon's normalized 8x2 canonical fallback. Row zero
          * is the WHITE/X map variant; row one is the ordinary/default variant.
-         *
-         * The style argument is intentionally not used yet. This is the
-         * canonical baseline that removes PieceBorder from black_tiles. Future
-         * style-specific border art should override semantic variants here (or
-         * through a data-driven registry), not reintroduce PCE tile numbers.
          */
         int row = instance.getMeta() == BeamColor.WHITE.ordinal() ? 0 : 1;
         IntVector offset = new IntVector(
