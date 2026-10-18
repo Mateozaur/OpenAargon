@@ -161,12 +161,15 @@ public class GameField implements IGameField {
             int meta = instance.getMeta();
 
             /*
-             * Visual lookup is now centralized. The catalog may use a legacy
-             * compatibility adapter, a per-cell style override, or eventually a
-             * native/custom visual definition. Native pieces currently fall back
-             * to their existing IGamePiece texture methods.
+             * Visual lookup is centralized and receives board context so
+             * semantic families such as borders can derive topology-aware roles
+             * without exposing legacy atlas/rotation details to the style layer.
              */
-            SpriteDefinition sprite = PieceVisualCatalog.resolve(instance, boardStyle);
+            SpriteDefinition sprite = PieceVisualCatalog.resolve(
+                    instance,
+                    boardStyle,
+                    this,
+                    c);
 
             if (sprite != null) {
                 RenderManager.bufferQuad(new Quad8I(
