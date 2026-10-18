@@ -5,17 +5,15 @@ import io.github.phantamanta44.openar.game.beam.Beam;
 import io.github.phantamanta44.openar.game.beam.BeamTile;
 import io.github.phantamanta44.openar.game.beam.Direction;
 import io.github.phantamanta44.openar.game.piece.*;
-import io.github.phantamanta44.openar.game.piece.impl.PieceBorder;
-import io.github.phantamanta44.openar.game.piece.impl.PieceLegacyStub;
-import io.github.phantamanta44.openar.game.piece.impl.PieceWall;
 import io.github.phantamanta44.openar.render.Line4I;
 import io.github.phantamanta44.openar.render.Quad8I;
 import io.github.phantamanta44.openar.render.RenderManager;
+import io.github.phantamanta44.openar.render.legacy.LegacyRenderResolver;
+import io.github.phantamanta44.openar.render.visual.PieceVisualCatalog;
+import io.github.phantamanta44.openar.render.visual.SpriteDefinition;
 import io.github.phantamanta44.openar.util.Array2D;
 import io.github.phantamanta44.openar.util.math.FloatVector;
 import io.github.phantamanta44.openar.util.math.IntVector;
-import io.github.phantamanta44.openar.render.legacy.LegacyRenderResolver;
-import io.github.phantamanta44.openar.render.legacy.LegacyTileSet;
 
 public class GameField implements IGameField {
 
@@ -146,6 +144,7 @@ public class GameField implements IGameField {
 
     public synchronized void bufferRenders(float xSize, float ySize, float ratio) {
         int origX = (int)-xSize, origY = (int)(ySize / ratio);
+        VisualStyleId boardStyle = LegacyRenderResolver.getTileSet().getVisualStyleId();
 
         pieceGrid.forEach((instance, c) -> {
             IGamePiece p = instance.getImplementation();
@@ -162,36 +161,22 @@ public class GameField implements IGameField {
             int meta = instance.getMeta();
 
             /*
-             * Use Collector's Edition legacy rendering only where OpenAargon's
-             * existing renderer is incomplete: full Wall variants and pieces that
-             * currently exist only as PieceLegacyStub. Borders keep the native
-             * renderer for the base tileset, but every alternate tileset is rendered
-             * from its own atlas so official level packs and fan packs can override
-             * border artwork without special-case pack logic.
+             * Visual lookup is now centralized. The catalog may use a legacy
+             * compatibility adapter, a per-cell style override, or eventually a
+             * native/custom visual definition. Native pieces currently fall back
+             * to their existing IGamePiece texture methods.
              */
-            boolean useLegacyRenderer =  p instanceof PieceWall
-                    || p instanceof PieceLegacyStub
-                    || (p instanceof PieceBorder
-                        && LegacyRenderResolver.getTileSet() != LegacyTileSet.BASE);
+            SpriteDefinition sprite = PieceVisualCatalog.resolve(instance, boardStyle);
 
-            /*
-             * Border rotation numbers are renderer-specific. PieceBorder's native
-             * topology normalization refers to columns in texture/border.png and
-             * must not be reused as legacy atlas rotation indices.
-             */
-            LegacyRenderResolver.Sprite legacySprite = useLegacyRenderer
-                    ? LegacyRenderResolver.resolve(p.getToken(), rot, meta)
-                    : null;
-
-            if (legacySprite != null) {
+            if (sprite != null) {
                 RenderManager.bufferQuad(new Quad8I(
                         EMPTY_SLOT_PATH, x, y, 103, 103, 0, 0, 32, 32));
 
                 RenderManager.bufferQuad(new Quad8I(
-                        legacySprite.getTexturePath(),
+                        sprite.getTexturePath(),
                         x, y, 103, 103,
-                        legacySprite.getTextureOffset().getX(),
-                        legacySprite.getTextureOffset().getY(),
+                        sprite.getTextureOffset().getX(),
+                        sprite.getTextureOffset().getY(),
                         32, 32));
             } else {
                 String path = p.getTexturePath(this, c, rot, meta);
