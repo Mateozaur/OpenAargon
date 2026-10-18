@@ -148,13 +148,15 @@ public class GameField implements IGameField {
 			/*
 			 * Use Collector's Edition legacy rendering only where OpenAargon's
 			 * existing renderer is incomplete: full Wall variants and pieces that
-			 * currently exist only as PieceLegacyStub. Existing implemented pieces
-			 * keep their own rendering so animation and special logic are preserved.
+			 * currently exist only as PieceLegacyStub. Borders keep the native
+			 * renderer for the base tileset, but every alternate tileset is rendered
+			 * from its own atlas so official level packs and fan packs can override
+			 * border artwork without special-case pack logic.
 			 */
 			boolean useLegacyRenderer =  p instanceof PieceWall
                                          || p instanceof PieceLegacyStub
                                          || (p instanceof PieceBorder
-                                            && LegacyRenderResolver.getTileSet() == LegacyTileSet.HOTTER);
+                                            && LegacyRenderResolver.getTileSet() != LegacyTileSet.BASE);
 			LegacyRenderResolver.Sprite legacySprite = useLegacyRenderer
 					? LegacyRenderResolver.resolve(p.getToken(), rot, meta)
 					: null;
