@@ -71,7 +71,7 @@ blob 1cd45a781fee5a0f9e19263a8dd84fbd3d9bd27e
 
 `MapFile.parse` decodes each 4-char cell as token / decimal rotation / BeamColor(meta) / mutability. Blank color -> BLACK; `X` -> WHITE.
 
-Normal outer frame uses blank meta:
+Normal outer frame:
 ```text
 =3 n top-left      =4 n top       =5 n top-right
 =2 n left                           =6 n right
@@ -91,13 +91,13 @@ Legacy oriented rotation meaning established for this frame:
 7 bottom-right corner (NW)
 ```
 
-Plain `WallTopology` alone is insufficient for asymmetric framing: left/right share N+S connectivity, top/bottom share E+W. Canonical state therefore needs oriented edge/corner role (or topology+facing). Legacy numeric rotation may be translated at the compatibility boundary but must not leak to styles.
+Plain `WallTopology` alone is insufficient for asymmetric framing: left/right share N+S and top/bottom share E+W. Canonical state therefore needs oriented edge/corner role (or topology+facing). Legacy numeric rotation is allowed only at the compatibility boundary.
 
 ## Root cause reproduced
 
 Legacy token `=` resolves to canonical `border` / `PieceBorder`.
 
-Before the new migration patch, non-BASE `PieceBorder` in `PieceVisualCatalog` was delegated to `LegacyRenderResolver` with raw rotation/meta.
+Pre-patch, non-BASE `PieceBorder` in `PieceVisualCatalog` delegated to `LegacyRenderResolver` with raw rotation/meta.
 
 `LegacyRenderResolver`: OA BLACK -> PCE color row 0. `wood.pce`/`render-map.csv` token `=`:
 ```text
@@ -105,99 +105,128 @@ PCE rows 0..6 -> 5,6,5,6,5,6,5,6
 PCE row 7     -> 79,59,97,117,118,58,98,78
 ```
 
-Thus SELECTOR blank-meta outer frame necessarily became repeating 5/6 under LP1, matching the screenshot. `X/WHITE` reaches row 7. This is a reproduced data-flow cause, not a visual guess.
+Thus SELECTOR blank-meta outer frame necessarily became repeated 5/6 under LP1, matching the screenshot. `X/WHITE` reaches row 7. This is a reproduced data-flow cause.
 
-Do **not** fix it by globally remapping LP1 `wood`: board border is a canonical PieceBorder concept and should not use generic PCE wood lookup.
+Do **not** fix by globally remapping LP1 `wood`: board border is a canonical PieceBorder concept and should not use generic PCE wood lookup.
 
 ## Native normalized border evidence
 
 `texture/border.png` is 256x64 = 8x2 32px variants.
 
-Path history shows it existed in 2016 initial commit `0d8b1ec...`; initial `PieceBorder` already rendered from it outside PCE/black_tiles. By `d1fbfdcd7f5fb3f57bec8ef04c4751187671d384` (`Piece movement`) offset was `rot*32`, row `(meta==6 ? 0 : 32)`. Current PieceBorder still uses the normalized sheet plus topology T-junction corrections.
+Path history:
+- existed in 2016 initial commit `0d8b1ec...`;
+- initial `PieceBorder` already rendered from it outside PCE/black_tiles;
+- `d1fbfdcd7f5fb3f57bec8ef04c4751187671d384` (`Piece movement`) used offset `rot*32`, row `(meta==6 ? 0 : 32)`;
+- current PieceBorder retained normalized sheet + topology T-junction fixes.
 
-Therefore routing non-BASE borders into generic legacy atlases was a later architectural regression relative to OpenAargon's long-standing normalized border model.
+Routing non-BASE borders into generic legacy atlases was therefore a later regression relative to OpenAargon's normalized border model.
 
-## Current semantic-border implementation
+## Implemented semantic-border patch
 
-### New `BorderVisualVariant`
-
+### 1. `BorderVisualVariant`
 Commit `4fcdb9faa009652e1a206a264920b2fc29d2973c` added `render/visual/BorderVisualVariant.java`.
 
-Canonical roles:
+Semantic roles:
 ```text
 BOTTOM_EDGE, BOTTOM_LEFT_CORNER, LEFT_EDGE, TOP_LEFT_CORNER,
 TOP_EDGE, TOP_RIGHT_CORNER, RIGHT_EDGE, BOTTOM_RIGHT_CORNER,
 TEE_SOUTH, TEE_NORTH
 ```
 
-`fromLegacyRotation()` is explicitly a compatibility translation. Each role currently has a default `border.png` column; T-junction semantic roles alias the historical native columns 4/5. Styles may later map the semantic enum to arbitrary resources.
+`fromLegacyRotation()` is explicitly compatibility-only. Each role currently has a default normalized `border.png` column; T-junction roles alias historical native columns 4/5. Future styles may map the same enum to unrelated resources.
 
-### `PieceBorder`
-
+### 2. `PieceBorder`
 Commit `c3c25636922af662426a3f9fdb6c97d06e05991d` added `getVisualVariant(field, coords, legacyRotation)`.
 
-- Legacy 0..7 is immediately translated to named semantic role.
-- Board topology wins for W+E+S (`TEE_SOUTH`) and W+E+N (`TEE_NORTH`).
-- Existing `getRenderRotation()` remains only as compatibility accessor returning default native column.
-- Native `getTextureOffset()` now consumes the semantic variant.
+- 0..7 immediately translated to named semantic role;
+- actual board topology wins for W+E+S (`TEE_SOUTH`) and W+E+N (`TEE_NORTH`);
+- `getRenderRotation()` retained only as compatibility accessor;
+- native offset now consumes the semantic variant.
 
-### `PieceVisualCatalog`
+### 3. `PieceVisualCatalog`
+Commit `297dded77df24569bca17eec6fc824287d8b6b7d` removed `PieceBorder` from generic `LegacyRenderResolver` selection.
 
-Commit `297dded77df24569bca17eec6fc824287d8b6b7d` removes `PieceBorder` from the generic `LegacyRenderResolver` decision.
-
-New context-aware overload:
+Added context-aware API:
 ```text
 resolve(PieceInstance, VisualStyleId, IGameField, IntVector coords)
 ```
-The old overload remains and delegates with null context.
+Old overload remains and delegates with null context.
 
-For PieceBorder the catalog now:
-- asks PieceBorder for `BorderVisualVariant`;
-- preserves semantic WHITE/X vs ordinary meta as the two normalized rows;
-- returns `texture/border.png` + semantic default column;
-- intentionally ignores style for now as a canonical baseline.
+Border resolution now:
+- obtains `BorderVisualVariant`;
+- keeps semantic WHITE/X versus ordinary/default as normalized 2-row choice;
+- returns `texture/border.png` + semantic column;
+- intentionally ignores board style for now as the canonical baseline.
 
-This is deliberate: **all styles stop depending on `black_tiles` for board border immediately**. Future LP1/HD/custom border art should override semantic variants in the catalog/data registry, not reintroduce PCE tile numbers.
+This means **all styles stop depending on `black_tiles` for PieceBorder immediately**. LP1/HD/custom themed border art should later override semantic variants, not PCE indices.
 
-`PieceWall` and `PieceLegacyStub` still use the CE legacy resolver and are separate future migrations.
+`PieceWall` and `PieceLegacyStub` remain on CE compatibility resolver for later migration.
 
-## GameField status
+### 4. `GameField`
+Commit `724fc22a6f920fc9db10dd702ff0a4eac3be775c` changed `bufferRenders` to call:
+```text
+PieceVisualCatalog.resolve(instance, boardStyle, this, c)
+```
+Board context and coordinates now reach canonical border resolution, activating topology-aware semantic roles during normal gameplay rendering.
 
-`GameField` already has `PieceInstance` + cell coordinate `c` during rendering. It still calls the old two-argument `PieceVisualCatalog.resolve(instance, boardStyle)` at this checkpoint. Next functional edit must pass `this, c` to activate topology-aware border resolution in the canonical catalog.
+## Validation performed
 
-## Tests/build
+- Branch HEAD after code patch: `724fc22a6f920fc9db10dd702ff0a4eac3be775c` before this notes commit.
+- Maven compiler target/source = Java 8; patch uses Java-8-compatible constructs (`Math.floorMod`, enums, ordinary overloads).
+- `.github/workflows` does not exist on this branch; commit status list is empty. No CI execution is available through the repository.
+- Repository has no `src/test` suite and `pom.xml` has no test framework dependency.
+- Compare `f8e6bfd3...` -> `724fc22a...` is ahead by 5 commits and changes only:
+  - `docs/lp1-recovery-notes.md`
+  - `GameField.java`
+  - `PieceBorder.java`
+  - new `BorderVisualVariant.java`
+  - `PieceVisualCatalog.java`
+- No `styles/lp1.csv`, `render-map.csv`, maps or original assets were modified.
+- Static source review confirms existing two-argument PieceVisualCatalog API remains for compatibility; GameField uses new four-argument API.
+- Full Maven compile was **not** run in this environment because there is no usable local checkout and no CI workflow. Runtime/build validation must therefore be performed by the user locally.
 
-No `src/test` suite and no test framework dependency in `pom.xml`. Do not add a framework solely for this migration. Validate by source consistency/build where available and user runtime test. Title-frame codepath remains unambiguously unidentified; it no longer blocks the fix because root cause is independently reproduced.
+## Expected runtime result
 
-## Action log (material actions)
+For LP1 SELECTOR:
+- blank-meta outer `=` cells must no longer resolve through LP1 `black_tiles` tile 5/6;
+- they should render from normalized `texture/border.png` using their semantic edge/corner roles;
+- `X/WHITE` separator cells should use the alternate normalized row;
+- topology-aware T-junction normalization should remain active because GameField now passes board context;
+- other legacy-backed pieces/walls should remain on their previous resolver paths.
 
-- Recovered repo/branch, inventoried CE assets/PCE/maps, documented tool limitations.
-- Proved original LP1 index preservation and no-global-remap rule.
-- Confirmed BMP geometry and LP3 tail anomaly via base64 binary ranges.
-- Sampled LP1 levels/PCE/render-map across all four skill groups.
+The first runtime question is **geometry/correctness**, not final LP1-themed art. If border shape is correct but appearance is not LP1-themed, next step is a style-specific `BorderVisualVariant` resource map — never a global raw `wood`/PCE remap.
+
+## Material action log
+
+- Recovered repo/branch and continuously maintained this note.
+- Inventoried CE assets/PCE/maps and documented tool limits.
+- Proved historical LP1 index-preservation/no-global-remap rule.
+- Confirmed BMP headers and LP3 +2-byte tail anomaly.
+- Sampled LP1 levels/PCE/render-map across all skills.
 - User supplied SELECTOR screenshot and clarified universal semantic-rendering target.
-- Reviewed LegacyRenderResolver, GameField, PieceVisualCatalog, PieceBorder, WallTopology, PieceInstance, VisualStyleId, SpriteDefinition, MapFile, BeamColor, PieceRegistry, pom.xml.
-- No existing test suite found.
-- Located exact SELECTOR map and decoded border state.
-- Reproduced failure: blank meta -> BLACK -> PCE row0 -> repeated 5/6.
-- Verified native border.png 8x2 and 2016 history outside PCE.
-- Commit search remained unreliable; direct path history API succeeded.
-- Added semantic enum (`4fcdb9fa`).
+- Located exact SELECTOR map; decoded border rotations/meta.
+- Reproduced failure blank meta -> BLACK -> PCE row0 -> repeated 5/6.
+- Verified normalized `border.png` dimensions/history outside PCE.
+- Added canonical border enum (`4fcdb9fa`).
 - Refactored PieceBorder semantic translation (`c3c25636`).
-- Removed PieceBorder from generic legacy resolver and added context-aware catalog API (`297dded7`).
-- No `styles/lp1.csv` rows changed.
+- Removed PieceBorder from generic legacy resolver and added context-aware catalog (`297dded7`).
+- Passed board context from GameField (`724fc22a`).
+- Checked Java 8 Maven config, absence of tests/workflows/status checks, and changed-file scope.
+- No raw LP1 mapping rows were added.
 
-Earlier note checkpoints include `49fa9e30`, `ee91c454`, `c6284f19`, `a2ea732b`, `8d640596`, `a2561ddc`, `f8e6bfd3`.
+Earlier note checkpoints include `49fa9e30`, `ee91c454`, `c6284f19`, `a2ea732b`, `8d640596`, `a2561ddc`, `f8e6bfd3`, `bf192a11`.
 
 ## Resume here
 
-1. Update `GameField.bufferRenders` to call `PieceVisualCatalog.resolve(instance, boardStyle, this, c)`.
-2. Inspect resulting source/import consistency; remove unused imports only if needed.
-3. Search for all `PieceVisualCatalog.resolve` callers and ensure compatibility.
-4. Validate branch/build if possible.
-5. Update this note with validation result.
-6. User runtime-test LP1 SELECTOR: ordinary outer border should stop showing repeated LP1 atlas tile 5/6. Verify both normal blank-meta frame and `X/WHITE` separator cells.
-7. If geometry is correct but art is not LP1-themed, add style-specific border art **by `BorderVisualVariant`**, not by raw PCE indices.
+**Patch is ready for local runtime/build validation.**
+
+Next:
+1. Pull/build `linux-modernization` and open LP1 `Skill1/Level_002.map` (`SELECTOR`).
+2. Compare outer border against previous screenshot.
+3. Check ordinary frame, X/WHITE separator and any T-junctions.
+4. Report compile error verbatim if build fails; do not speculate before fixing it.
+5. If geometry is correct but style is visually generic, implement style-specific border art keyed by `BorderVisualVariant`.
+6. If geometry is still wrong, inspect the exact semantic variant selected per failing coordinate; do not return to global LP1 index remapping.
 
 Repository: `Mateozaur/OpenAargon`  
 Branch: `linux-modernization`
