@@ -92,3 +92,26 @@ Do **not** spend more time on Selector or the LP1 skill DLL first. Resume by tra
 Repository: Mateozaur/OpenAargon
 Branch: linux-modernization
 ```
+
+## New-chat hand-off
+
+If the current ChatGPT conversation hits its context-length limit, do not restart the investigation from scratch. Open a new chat and use this note as the source of truth for the current state.
+
+Suggested prompt:
+
+```text
+Continue the OpenAargon LP1 legacy-rendering investigation in repository
+Mateozaur/OpenAargon, branch linux-modernization.
+
+First read docs/lp1-recovery-notes.md and treat it as the hand-off state.
+Do not redo the Selector investigation: Selector (I / token 73) is already
+proven to use the shared exp1 atlas and must not get LP1 overrides.
+
+Resume from the unresolved task: verify whether mappings currently using
+atlas=base preserve their tile-index semantics in LP1, by tracing the original
+black_tiles/TILESFILE assets and the provenance of base.png and lp1.png.
+Only add rows to styles/lp1.csv for deviations supported by concrete evidence.
+Keep docs/lp1-recovery-notes.md updated with new confirmed findings.
+```
+
+The chat/UI warning about conversation length is not itself a project-state change; this section exists only so work can be resumed safely if a new conversation becomes necessary.
