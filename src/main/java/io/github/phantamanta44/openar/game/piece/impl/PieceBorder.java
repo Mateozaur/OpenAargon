@@ -36,6 +36,18 @@ public class PieceBorder implements IGamePiece {
 
     @Override
     public IntVector getTextureOffset(IGameField field, IntVector coords, int rot, int meta) {
+        int renderRotation = getRenderRotation(field, coords, rot);
+        return new IntVector(renderRotation * 32, (meta == 6) ? 0 : 32);
+    }
+
+    /**
+     * Returns the visual border variant that should be rendered for this cell.
+     * This is intentionally independent from the texture source: the base
+     * border sheet and alternate legacy tilesets must use the same normalized
+     * border topology.
+     */
+    public int getRenderRotation(IGameField field, IntVector coords, int rot) {
+        int safeRot = Math.floorMod(rot, 8);
 
         /*
          * Automatic topology detection is only used for an actual board.
@@ -49,24 +61,19 @@ public class PieceBorder implements IGamePiece {
             boolean west  = isBorder(field, coords.getX() - 1, coords.getY());
 
             /*
-             * border.png:
-             *
-             * row 1, column 4 = west + east + south
-             * row 1, column 5 = west + east + north
+             * Border variant 4 = west + east + south
+             * Border variant 5 = west + east + north
              */
             if (west && east && south && !north) {
-                return new IntVector(4 * 32, 0);
+                return 4;
             }
 
             if (west && east && north && !south) {
-                return new IntVector(5 * 32, 0);
+                return 5;
             }
         }
 
-        /*
-         * Original OpenAargon behaviour for every other border shape.
-         */
-        return new IntVector(rot * 32, (meta == 6) ? 0 : 32);
+        return safeRot;
     }
 
     private boolean isBorder(IGameField field, int x, int y) {
