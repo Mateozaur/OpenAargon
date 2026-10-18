@@ -1,15 +1,10 @@
 package io.github.phantamanta44.openar.game.piece.impl;
 
-import io.github.phantamanta44.openar.game.beam.Beam;
 import io.github.phantamanta44.openar.game.map.GameField;
 import io.github.phantamanta44.openar.game.map.IGameField;
-import io.github.phantamanta44.openar.game.piece.IGamePiece;
 import io.github.phantamanta44.openar.util.math.IntVector;
 
-import java.util.Collection;
-import java.util.Collections;
-
-public class PieceBorder implements IGamePiece {
+public class PieceBorder extends AbstractWallPiece {
 
     private static final int BOARD_WIDTH = 20;
     private static final int BOARD_HEIGHT = 13;
@@ -25,11 +20,6 @@ public class PieceBorder implements IGamePiece {
     }
 
     @Override
-    public Collection<Beam> getReflections(IGameField field, IntVector coords, int rot, int meta, Beam in) {
-        return Collections.emptyList();
-    }
-
-    @Override
     public String getTexturePath(IGameField field, IntVector coords, int rot, int meta) {
         return "texture/border.png";
     }
@@ -42,12 +32,11 @@ public class PieceBorder implements IGamePiece {
 
     /**
      * Returns the visual border variant that should be rendered for this cell.
-     * This is intentionally independent from the texture source: the base
-     * border sheet and alternate legacy tilesets must use the same normalized
-     * border topology.
+     * This remains specific to the native border sheet; legacy atlas variants
+     * are resolved independently by the legacy renderer.
      */
     public int getRenderRotation(IGameField field, IntVector coords, int rot) {
-        int safeRot = Math.floorMod(rot, 8);
+        int safeRot = normalizeVariant(rot);
 
         /*
          * Automatic topology detection is only used for an actual board.
@@ -61,8 +50,8 @@ public class PieceBorder implements IGamePiece {
             boolean west  = isBorder(field, coords.getX() - 1, coords.getY());
 
             /*
-             * Border variant 4 = west + east + south
-             * Border variant 5 = west + east + north
+             * Native border.png variant 4 = west + east + south.
+             * Native border.png variant 5 = west + east + north.
              */
             if (west && east && south && !north) {
                 return 4;
