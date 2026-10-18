@@ -44,7 +44,7 @@ public class MapFile {
     }
 
     public void populate(GameField f) {
-        pieceGrid.forEach(f::setPieceInstance);
+        pieceGrid.forEach((state, c) -> f.setPieceInstance(c, state));
 
         if (Boolean.getBoolean("aargon.debugBorders")) {
             Aargon.getLogger().info("Border diagnostics (x,y rot meta topology[NESW])");
