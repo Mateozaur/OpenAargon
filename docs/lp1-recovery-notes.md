@@ -142,6 +142,8 @@ Thus LP3 does **not** use a different grid, bpp, compression, or DIB format. Bot
 
 The connector can range-read base64, but reconstructing complete ~922 KB BMP and complete compressed PNG through chat-sized chunks is not practical. Direct pixel-for-pixel LP1 BMP -> `lp1.png` comparison therefore remains outstanding.
 
+An additional attempt to obtain complete binary files through a raw GitHub/web/container download path also failed: direct raw/blob web opens produced cache misses, and the local download helper refused the raw URL because it had not been successfully exposed by the web layer. A web search for the exact repository image path did not surface the repository file. No local binary file was obtained by that route.
+
 ## LP1 PACK.INI
 
 ```ini
@@ -169,8 +171,6 @@ S -> source.pce -> ordinary/default
 Expanded cross-skill sampling used `Level_001.map` from each remaining skill:
 
 ### Skill2 / Level_001 — `OUTSIDE THE BOX`
-
-Relevant shared piece tokens observed and directly checked:
 
 ```text
 I -> selector.pce  -> explicit exp1
@@ -226,16 +226,19 @@ p / 112 -> spaceship -> atlas=exp1
 I / 73  -> selector  -> atlas=exp1
 ```
 
-Cross-skill sample checks against the current `render-map.csv` additionally confirm:
+Cross-skill sample checks against the current `render-map.csv` confirm exact PCE-derived mappings:
 
 ```text
-W / 87 -> oneway    -> atlas=base, tiles 211..218 (matches oneway.pce)
-R / 82 -> refractor -> atlas=base, tiles 176..179 (matches refractor.pce)
-T / 84 -> threeway  -> atlas=base, tiles 268..275 (matches threeway.pce)
-F / 70 -> filter    -> atlas=base, PCE picture sequence matches filter.pce
+W / 87 -> oneway    -> atlas=base, tiles 211..218
+R / 82 -> refractor -> atlas=base, tiles 176..179
+T / 84 -> threeway  -> atlas=base, tiles 268..275
+F / 70 -> filter    -> atlas=base, picture sequence 120/123/122/125/121/126/124/120
+P / 80 -> prism     -> atlas=base, tiles 80..87
+% / 37 -> double    -> atlas=base, tiles 174/175/99/119 repeated by rotation
+< / 60 -> splitter  -> atlas=base, tiles 180..187
 ```
 
-The fetched render map also shows adjacent expansion pieces (for example `prismirror`) remaining on `exp1`; expansion and base families are deliberately mixed according to PCE selection, not by index magnitude or active LP1 style.
+The fetched render map also shows explicit expansion pieces such as `selector` and `prismirror` remaining on `exp1`. Expansion and base families are deliberately mixed according to PCE selection, not by index magnitude or active LP1 style.
 
 Thus current OpenAargon behavior matches the verified original contract across a broader LP1 sample: LP1 style substitutes the selected `base` atlas while preserving shared PCE indices; explicit expansion mappings are not redirected.
 
@@ -287,7 +290,7 @@ Independent evidence now includes:
 - no LP1 local expansion sheets or alternate PCE/remap corpus;
 - real LP1 maps from all four skill groups using shared token definitions;
 - ordinary and explicit-expansion PCE cases coexisting in LP1 exactly as expected;
-- current OpenAargon render-map indices matching the sampled PCE tables;
+- current OpenAargon render-map indices matching every distinctive sampled PCE table checked from Skill2-Skill4;
 - direct binary BMP headers confirming matching base/LP1 full-sheet storage geometry;
 - LP3's +2-byte anomaly resolved as two extra zero bytes / `biSizeImage` quirk rather than alternate geometry.
 
@@ -295,10 +298,12 @@ Do not add rows to `styles/lp1.csv` unless a specific semantic index deviation i
 
 Remaining independent checks, in priority order:
 
-1. Direct pixel/coordinate comparison of original LP1 `black_tiles.bmp` against OpenAargon's `lp1.png` if complete binary transfer becomes practical.
+1. Direct pixel/coordinate comparison of original LP1 `black_tiles.bmp` against OpenAargon's `lp1.png` if a practical complete-binary transfer path becomes available.
 2. Locate original active-pack resource lookup code/strings if a readable executable/source path becomes available.
-3. Optionally sample additional levels beyond `Level_001` if looking for a rare token not covered by the current four-skill sample.
-4. Finish the last few unclassified PCE files only if needed to investigate such a concrete exception.
+3. Sample additional levels beyond `Level_001` only if looking for a rare token not covered by the current four-skill sample or investigating a concrete visual discrepancy.
+4. Finish the last few unclassified PCE files only if needed for such a concrete exception.
+
+Absent a new discrepancy or new binary/source access, further speculative LP1 remapping work has low value and risks introducing incorrect overrides.
 
 ## Action log — 2026-10-18
 
@@ -337,9 +342,10 @@ This log intentionally includes successful checks, negative searches, correction
 - Parsed relevant piece tokens from all three maps, taking care not to treat per-piece color/rotation characters as separate tokens.
 - Direct-read additional PCEs needed by the sample: `refractor`, `water`, `wood`, `mirror`, `filter`, `polarizer`, `prism`, `tnt`, `threeway`, `splitter`, `mine`, `oneway`, `prismirror`, `doubleslit`, `double`.
 - Identified Skill2 sample as `I` exp1 plus `O/W/R/S` ordinary; Skill3 as `T/F/P/O/S` ordinary; Skill4 as `#/%/</R/P/O/S` ordinary.
-- Re-fetched current `render-map.csv` and searched its response for sampled pieces. Confirmed `oneway` base 211..218, `refractor` base 176..179, `threeway` base 268..275, and `filter` base sequence matching their PCE tables; Selector remains exp1.
+- Re-fetched current `render-map.csv` and verified sampled pieces against direct PCE reads: OneWay, Refractor, ThreeWay, Filter, Prism, Double, and Splitter all use `atlas=base` with the exact PCE picture sequences; Selector remains `exp1`.
 - Recorded the cross-skill corpus result: no LP1-specific remapping mechanism appeared; ordinary and expansion PCE choices remain shared and coherent across all four skill groups.
-- No functional code and no `styles/lp1.csv` mapping rows have been changed; only this recovery note has been updated.
+- Attempted an alternate full-binary path using raw GitHub URL + web/container download. Raw/blob web fetches returned cache misses; the container downloader refused the raw URL because the web layer had not successfully exposed it. A web search for the exact image path did not return the repository asset. No binary file was materialized.
+- No functional code and no `styles/lp1.csv` mapping rows have been changed; only recovery/documentation notes have been updated.
 
 ## Session checkpoint / notes commits
 
@@ -355,17 +361,18 @@ Known recovery-note checkpoints include:
 26eda22c  record OpenAargon alignment and no-override conclusion
 49fa9e30  Finalize LP1 recovery handoff checkpoint
 ee91c454  Record LP1 provenance and BMP header validation
+c6284f19  Record LP3 header check and cross-skill LP1 sampling
 ```
 
 The action log is authoritative; intermediate note commits may have additional hashes/messages in branch history.
 
 ## Resume here
 
-The LP1 base-index question is provisionally resolved in favor of **index preservation with high confidence**. The conclusion is no longer based on dimensions or a single sample level: it is supported by original resource structure, decoded binary headers, real LP1 maps from all four skill groups, direct PCE atlas-selection data, and matching OpenAargon render-map entries.
+The LP1 base-index question is provisionally resolved in favor of **index preservation with high confidence**. The conclusion is no longer based on dimensions or a single sample level: it is supported by original resource structure, decoded binary headers, real LP1 maps from all four skill groups, direct PCE atlas-selection data, and exact matching OpenAargon render-map entries for the sampled distinctive tokens.
 
 Do not add LP1 overrides unless a specific index is proven semantically different.
 
-The best remaining independent confirmation is a practical full binary path for pixel/coordinate comparison of original LP1 `black_tiles.bmp` against `lp1.png`, or readable original loader/resource-search code. In the absence of those, the next useful investigation should be driven by an observed rendering discrepancy rather than speculative expansion of `lp1.csv`.
+The best remaining independent confirmation is a practical full-binary path for pixel/coordinate comparison of original LP1 `black_tiles.bmp` against `lp1.png`, or readable original loader/resource-search code. Both accessible binary-download routes tried in this session are documented above. In the absence of new access or an observed rendering discrepancy, the next useful work should be driven by a concrete failing visual/token case rather than speculative expansion of `lp1.csv`.
 
 ```text
 Repository: Mateozaur/OpenAargon
