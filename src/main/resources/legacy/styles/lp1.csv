@@ -1,0 +1,3 @@
+tokenCode,piece,atlas,color,rotation,tile,animated,animationIndex
+# Add only entries verified against the original Level Pack 1 assets.
+# Missing entries intentionally fall back to legacy/render-map.csv during migration.
