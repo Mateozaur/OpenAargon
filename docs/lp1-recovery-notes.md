@@ -145,10 +145,11 @@ Thus omission of `TilesFile` **inside a normal `[FLAGS]` definition** is positiv
 
 ## Next validation steps
 
-1. Continue direct `.pce` reads in batches and record each batch before proceeding.
-2. Trace original resource/search-path behavior from configuration/code/assets; `PACK.INI` itself has now been ruled out as the place where tile lookup is configured.
-3. Correlate LP1 BMP with OpenAargon `lp1.png`; only if provenance is insufficient, compare cells on the 20x15 grid against PCE indices.
-4. Add `styles/lp1.csv` rows only for verified deviations. If slot semantics are preserved, the correct result may be no additional LP1 overrides.
+1. Check whether other original Level Packs also contain same-named pack-local `Pictures/black_tiles.bmp` / `black_tiles_small.bmp`; repeated structure would be strong evidence for intentional active-pack shadowing.
+2. Continue direct `.pce` reads in batches and record each batch before proceeding.
+3. Trace original resource/search-path behavior from configuration/code/assets; `PACK.INI` itself has now been ruled out as the place where tile lookup is configured.
+4. Correlate LP1 BMP with OpenAargon `lp1.png`; only if provenance is insufficient, compare cells on the 20x15 grid against PCE indices.
+5. Add `styles/lp1.csv` rows only for verified deviations. If slot semantics are preserved, the correct result may be no additional LP1 overrides.
 
 ## Existing relevant commits
 
@@ -179,12 +180,15 @@ b21842799933df839472c8dd81fae84adc0c824e  create initial recovery notes
 - Directly fetched second PCE batch: `coin.pce`, `complex.pce`, `convert.pce`; recorded `coin=ordinary/default`, `complex=exp1`, `convert=ordinary/default`.
 - Noted that `convert.pce` has indices `260..267` despite using the ordinary default atlas, so tile-number ranges alone must not be used to infer atlas family.
 - Directly fetched third PCE batch: `double.pce`, `doubleslit.pce`, `explosion.pce`; recorded `double` and `doubleslit` as ordinary/default and `explosion` as having no `[FLAGS]` / no explicit atlas selection.
+- Searched repository code for the literal `Level Packs`; zero indexed source results were returned.
+- Searched repository code for `LevelPack`; zero indexed source results were returned.
+- The earlier recursive-tree scan was also probed for `LevelPack`; it did not yield actionable loader source evidence. These negative search results are treated as indexing/source-availability limits, not proof that the original executable lacks active-pack lookup logic.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
-- Next action: inspect resource lookup evidence in the repository while continuing PCE inventory; the highest-value unresolved issue is how the active pack makes its same-named ordinary sheet take precedence.
+- Next action: enumerate `Pictures/` for the other original Level Packs and test whether the same ordinary tile-sheet filenames recur pack-locally.
 
 ## Resume here
 
-LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. Direct PCE inventory has read 9/29 files; 7 normal piece definitions are classified, one format/default file is documented, and one animation-only helper remains intentionally unclassified. Next, prioritize tracing active-pack resource lookup, then continue PCE inventory and semantic slot validation.
+LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. Direct PCE inventory has read 9/29 files. Literal code searches have not exposed active-pack lookup source. Next, test the repeated directory convention across other Level Packs; then continue PCE inventory and semantic slot validation.
 
 ```text
 Repository: Mateozaur/OpenAargon
