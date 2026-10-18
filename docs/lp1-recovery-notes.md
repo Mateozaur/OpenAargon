@@ -123,20 +123,23 @@ SmallTilesFile default: black_tiles_small.bmp
 Direct inventory progress:
 
 ```text
-blackhole.pce  explicit exp1: black_tiles_exp1.bmp / black_tiles_small_exp1.bmp
-blank.pce      no explicit override; documents ordinary defaults above
-brick.pce      no explicit TilesFile/SmallTilesFile -> ordinary defaults
-coin.pce       no explicit TilesFile/SmallTilesFile -> ordinary defaults
-complex.pce    explicit exp1: black_tiles_exp1.bmp / black_tiles_small_exp1.bmp
-convert.pce    no explicit TilesFile/SmallTilesFile -> ordinary defaults
+blackhole.pce   explicit exp1: black_tiles_exp1.bmp / black_tiles_small_exp1.bmp
+blank.pce       no explicit override; documents ordinary defaults above
+brick.pce       no explicit TilesFile/SmallTilesFile -> ordinary defaults
+coin.pce        no explicit TilesFile/SmallTilesFile -> ordinary defaults
+complex.pce     explicit exp1: black_tiles_exp1.bmp / black_tiles_small_exp1.bmp
+convert.pce     no explicit TilesFile/SmallTilesFile -> ordinary defaults
+double.pce      no explicit TilesFile/SmallTilesFile -> ordinary defaults
+doubleslit.pce  no explicit TilesFile/SmallTilesFile -> ordinary defaults
+explosion.pce   no [FLAGS] section and no explicit tile-file choice; keep unclassified rather than infer beyond the file
 ```
 
-Thus omission of `TilesFile` is positive evidence for use of the ordinary `black_tiles.bmp`, not an unknown value. Also, picture-number magnitude cannot classify the atlas: `convert.pce` uses ordinary defaults while its picture table contains indices `260..267`.
+Thus omission of `TilesFile` **inside a normal `[FLAGS]` definition** is positive evidence for use of the ordinary `black_tiles.bmp`, not an unknown value. `explosion.pce` is treated separately because it contains only an animation list and no `[FLAGS]` section. Also, picture-number magnitude cannot classify the atlas: `convert.pce` uses ordinary defaults while its picture table contains indices `260..267`.
 
 ## Current open questions
 
 1. What general loader/search-path code makes pack-local `Pictures/black_tiles.bmp` shadow the shared/base sheet?
-2. Complete the remaining 23 direct `.pce` reads and classify each as ordinary/default, exp1, or exp2.
+2. Complete the remaining 20 direct `.pce` reads and classify each as ordinary/default, exp1, exp2, or non-piece/helper where appropriate.
 3. Do LP1 `black_tiles.bmp` tile slots preserve the semantic ordering expected by shared PCE picture indices?
 4. Does OpenAargon's `lp1.png` correspond directly to LP1's pack-local `black_tiles.bmp`, with ordering preserved?
 
@@ -175,12 +178,13 @@ b21842799933df839472c8dd81fae84adc0c824e  create initial recovery notes
 - Directly fetched first PCE batch: `blackhole.pce`, `blank.pce`, `brick.pce`; recorded `blackhole=exp1`, the documented ordinary defaults, and `brick=ordinary/default`.
 - Directly fetched second PCE batch: `coin.pce`, `complex.pce`, `convert.pce`; recorded `coin=ordinary/default`, `complex=exp1`, `convert=ordinary/default`.
 - Noted that `convert.pce` has indices `260..267` despite using the ordinary default atlas, so tile-number ranges alone must not be used to infer atlas family.
+- Directly fetched third PCE batch: `double.pce`, `doubleslit.pce`, `explosion.pce`; recorded `double` and `doubleslit` as ordinary/default and `explosion` as having no `[FLAGS]` / no explicit atlas selection.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
-- Next action: continue alphabetically with `double.pce`, `doubleslit.pce`, `explosion.pce`, then record the next batch.
+- Next action: inspect resource lookup evidence in the repository while continuing PCE inventory; the highest-value unresolved issue is how the active pack makes its same-named ordinary sheet take precedence.
 
 ## Resume here
 
-LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. Direct PCE inventory has classified 6/29 files. Continue alphabetically from `double.pce`, recording every batch, then trace active-pack lookup and semantic slot preservation.
+LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. Direct PCE inventory has read 9/29 files; 7 normal piece definitions are classified, one format/default file is documented, and one animation-only helper remains intentionally unclassified. Next, prioritize tracing active-pack resource lookup, then continue PCE inventory and semantic slot validation.
 
 ```text
 Repository: Mateozaur/OpenAargon
