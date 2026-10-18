@@ -5,7 +5,8 @@ package io.github.phantamanta44.openar.game.piece;
  *
  * PieceDefinition describes what the piece is. PieceInstance describes one
  * occurrence of it on a board. Keeping these values together prevents level
- * loaders from having to maintain several parallel grids for one tile.
+ * loaders and the runtime field from maintaining several parallel grids for
+ * one tile.
  */
 public final class PieceInstance {
 
@@ -51,6 +52,18 @@ public final class PieceInstance {
 
     public int getMutability() {
         return mutability;
+    }
+
+    public PieceInstance withRotation(int value) {
+        return new PieceInstance(definition, value, meta, mutability);
+    }
+
+    public PieceInstance withMeta(int value) {
+        return new PieceInstance(definition, rotation, value, mutability);
+    }
+
+    public PieceInstance withMutability(int value) {
+        return new PieceInstance(definition, rotation, meta, value);
     }
 
 }
