@@ -126,14 +126,17 @@ Direct inventory progress:
 blackhole.pce  explicit exp1: black_tiles_exp1.bmp / black_tiles_small_exp1.bmp
 blank.pce      no explicit override; documents ordinary defaults above
 brick.pce      no explicit TilesFile/SmallTilesFile -> ordinary defaults
+coin.pce       no explicit TilesFile/SmallTilesFile -> ordinary defaults
+complex.pce    explicit exp1: black_tiles_exp1.bmp / black_tiles_small_exp1.bmp
+convert.pce    no explicit TilesFile/SmallTilesFile -> ordinary defaults
 ```
 
-Thus omission of `TilesFile` is positive evidence for use of the ordinary `black_tiles.bmp`, not an unknown value.
+Thus omission of `TilesFile` is positive evidence for use of the ordinary `black_tiles.bmp`, not an unknown value. Also, picture-number magnitude cannot classify the atlas: `convert.pce` uses ordinary defaults while its picture table contains indices `260..267`.
 
 ## Current open questions
 
 1. What general loader/search-path code makes pack-local `Pictures/black_tiles.bmp` shadow the shared/base sheet?
-2. Complete the remaining 26 direct `.pce` reads and classify each as ordinary/default, exp1, or exp2.
+2. Complete the remaining 23 direct `.pce` reads and classify each as ordinary/default, exp1, or exp2.
 3. Do LP1 `black_tiles.bmp` tile slots preserve the semantic ordering expected by shared PCE picture indices?
 4. Does OpenAargon's `lp1.png` correspond directly to LP1's pack-local `black_tiles.bmp`, with ordering preserved?
 
@@ -169,16 +172,15 @@ b21842799933df839472c8dd81fae84adc0c824e  create initial recovery notes
 - Fetched LP1 `PACK.INI`; confirmed it contains no picture/tile/search-path configuration.
 - Retrieved the authoritative `Pieces/` directory listing. Corrected preliminary count from 27 to 29 after recounting the enumerated names.
 - Ran GitHub repository code search for `TILESFILE` scoped to the CE `Pieces` directory; it returned zero results and was classified as a search-index limitation.
-- Directly fetched `blackhole.pce`, `blank.pce`, and `brick.pce`.
-- Recorded `blackhole.pce` as explicit `exp1`.
-- Recorded from `blank.pce` that omitted `TilesFile` / `SmallTilesFile` defaults are `black_tiles.bmp` / `black_tiles_small.bmp`.
-- Recorded `brick.pce` as ordinary/default because it omits both file flags.
+- Directly fetched first PCE batch: `blackhole.pce`, `blank.pce`, `brick.pce`; recorded `blackhole=exp1`, the documented ordinary defaults, and `brick=ordinary/default`.
+- Directly fetched second PCE batch: `coin.pce`, `complex.pce`, `convert.pce`; recorded `coin=ordinary/default`, `complex=exp1`, `convert=ordinary/default`.
+- Noted that `convert.pce` has indices `260..267` despite using the ordinary default atlas, so tile-number ranges alone must not be used to infer atlas family.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
-- Next action: fetch the next PCE batch (`coin`, `complex`, `convert`, then continue alphabetically) and append classifications.
+- Next action: continue alphabetically with `double.pce`, `doubleslit.pce`, `explosion.pce`, then record the next batch.
 
 ## Resume here
 
-LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. Direct PCE inventory has started and establishes that omitted tile-file flags mean the ordinary pair. Continue alphabetically from `coin.pce`, recording every batch, then trace active-pack lookup and semantic slot preservation.
+LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. Direct PCE inventory has classified 6/29 files. Continue alphabetically from `double.pce`, recording every batch, then trace active-pack lookup and semantic slot preservation.
 
 ```text
 Repository: Mateozaur/OpenAargon
