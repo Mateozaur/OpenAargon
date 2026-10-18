@@ -89,6 +89,12 @@ Both are represented as 20x15 atlases by `LegacyTileSet`; this is only structura
 3. Correlate the physical BMP files with OpenAargon's `base.png` and `lp1.png` where possible (dimensions, content, conversion history/provenance).
 4. If original-resource tracing is still insufficient, compare `base.png` and `lp1.png` on their 20x15 cell grid and cross-check changed/same slots against authoritative PCE picture indices. Semantic slot identity matters; pixel equality is not required.
 
+## Resume checkpoint — 2026-10-18
+
+Resumed on branch `linux-modernization` from HEAD `b74ac775a35251dcfcac8ed9f52c4fde81558f9f`.
+
+No functional code or mapping changes have been made in this resumed pass yet. The Selector and LP1 skill-DLL branches of the investigation remain parked. The immediate work sequence is unchanged: inventory every tracked `Pieces/*.pce` `TILESFILE` / `SmallTILESFILE` value, locate all `black_tiles*.bmp` variants, inspect LP1 `PACK.INI` and its resource lookup behavior, then use that evidence to decide whether any verified `atlas=base` slots require LP1 overrides.
+
 ## Next validation steps
 
 1. Inventory `TILESFILE` / `SmallTILESFILE` values in tracked `Aargon Deluxe Collectors Edition 1.4.CE/Pieces/*.pce` files to separate ordinary/base pieces from `exp1` / `exp2` pieces.
