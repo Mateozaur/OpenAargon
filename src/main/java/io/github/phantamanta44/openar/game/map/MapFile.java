@@ -4,7 +4,9 @@ import io.github.phantamanta44.openar.Aargon;
 import io.github.phantamanta44.openar.game.beam.BeamColor;
 import io.github.phantamanta44.openar.game.piece.IGamePiece;
 import io.github.phantamanta44.openar.game.piece.PieceRegistry;
+import io.github.phantamanta44.openar.game.piece.impl.PieceBorder;
 import io.github.phantamanta44.openar.util.Array2D;
+import io.github.phantamanta44.openar.util.math.IntVector;
 
 public class MapFile {
 
@@ -46,7 +48,29 @@ public class MapFile {
 			f.setMeta(c, metaGrid.get(c));
 			f.setMutability(c, intGrid.get(c));
 		});
+
+		if (Boolean.getBoolean("aargon.debugBorders")) {
+			Aargon.getLogger().info("Border diagnostics (x,y rot meta topology[NESW])");
+			pieceGrid.forEach((p, c) -> {
+				if (p instanceof PieceBorder) {
+					boolean n = isBorder(c.getX(), c.getY() - 1);
+					boolean e = isBorder(c.getX() + 1, c.getY());
+					boolean s = isBorder(c.getX(), c.getY() + 1);
+					boolean w = isBorder(c.getX() - 1, c.getY());
+					Aargon.getLogger().info(
+							"BORDER {},{} rot={} meta={} topology={}{}{}{}",
+							c.getX(), c.getY(), rotGrid.get(c), metaGrid.get(c),
+							n ? "N" : "-", e ? "E" : "-", s ? "S" : "-", w ? "W" : "-");
+				}
+			});
+		}
+
 		f.updateBeams();
+	}
+
+	private boolean isBorder(int x, int y) {
+		if (x < 0 || y < 0 || x >= 20 || y >= 13) return false;
+		return pieceGrid.get(new IntVector(x, y)) instanceof PieceBorder;
 	}
 
 }
