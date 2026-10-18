@@ -154,3 +154,9 @@ new confirmed findings.
 ```
 
 The chat/UI warning about conversation length is not itself a project-state change; this section exists only so work can be resumed safely if a new conversation becomes necessary.
+
+## Investigation action log — 2026-10-18
+
+- Restarted the investigation on `linux-modernization` and read this recovery note before touching mappings or code.
+- Confirmed the working repository is `Mateozaur/OpenAargon`; an initial probe against the guessed owner `OpenAargon/OpenAargon` returned 404 and was discarded without changing project state.
+- Next action: enumerate the tracked Collector's Edition root and `Pieces/` directory directly through GitHub, then record the exact locations of `PACK.INI` and all `black_tiles*.bmp` files before inspecting their contents.
