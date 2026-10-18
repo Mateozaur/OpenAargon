@@ -3,6 +3,7 @@ package io.github.phantamanta44.openar.game.piece.impl;
 import io.github.phantamanta44.openar.game.map.GameField;
 import io.github.phantamanta44.openar.game.map.IGameField;
 import io.github.phantamanta44.openar.game.piece.WallTopology;
+import io.github.phantamanta44.openar.render.visual.BorderVisualVariant;
 import io.github.phantamanta44.openar.util.math.IntVector;
 
 public class PieceBorder extends AbstractWallPiece {
@@ -27,54 +28,66 @@ public class PieceBorder extends AbstractWallPiece {
 
     @Override
     public IntVector getTextureOffset(IGameField field, IntVector coords, int rot, int meta) {
-        int renderRotation = getRenderRotation(field, coords, rot);
-        return new IntVector(renderRotation * 32, (meta == 6) ? 0 : 32);
+        BorderVisualVariant variant = getVisualVariant(field, coords, rot);
+        return new IntVector(
+                variant.getDefaultSpriteColumn() * 32,
+                (meta == 6) ? 0 : 32);
     }
 
     /**
-     * Returns the visual border variant that should be rendered for this cell.
-     * This remains specific to the native border sheet; legacy atlas variants
-     * are resolved independently by the legacy renderer.
+     * Resolves legacy map state into a semantic border role.
+     *
+     * Most CE border cells use the stored rotation as an oriented frame hint;
+     * that numeric encoding is translated here and does not need to leak into
+     * style/render code. Board topology wins for the two T-junction cases that
+     * cannot be represented reliably by the raw map rotation alone.
      */
-    public int getRenderRotation(IGameField field, IntVector coords, int rot) {
-        int safeRot = normalizeVariant(rot);
+    public BorderVisualVariant getVisualVariant(
+            IGameField field,
+            IntVector coords,
+            int legacyRotation) {
+        BorderVisualVariant fallback =
+                BorderVisualVariant.fromLegacyRotation(legacyRotation);
 
         /*
          * Automatic topology detection is only used for an actual board.
          * Other IGameField implementations, such as the wrapper used while
-         * dragging a piece, fall back to the original map encoding.
+         * dragging a piece, retain the translated legacy orientation.
          */
-        if (field instanceof GameField) {
+        if (field instanceof GameField && coords != null) {
             WallTopology topology = getBorderTopology(field, coords);
 
-            /*
-             * Native border.png variant 4 = west + east + south.
-             * Native border.png variant 5 = west + east + north.
-             */
             if (topology.hasWest()
                     && topology.hasEast()
                     && topology.hasSouth()
                     && !topology.hasNorth()) {
-                return 4;
+                return BorderVisualVariant.TEE_SOUTH;
             }
 
             if (topology.hasWest()
                     && topology.hasEast()
                     && topology.hasNorth()
                     && !topology.hasSouth()) {
-                return 5;
+                return BorderVisualVariant.TEE_NORTH;
             }
         }
 
-        return safeRot;
+        return fallback;
+    }
+
+    /**
+     * Compatibility accessor for older callers that still expect the native
+     * border.png column as an integer.
+     */
+    public int getRenderRotation(IGameField field, IntVector coords, int rot) {
+        return getVisualVariant(field, coords, rot).getDefaultSpriteColumn();
     }
 
     /**
      * Derives board connectivity independently from the legacy rotation value.
-     * For now native border rendering only connects to other PieceBorder cells,
-     * preserving the existing behaviour exactly. Future style resolvers may
-     * choose a broader wall-like connectivity rule without changing this data
-     * model.
+     * Native border rendering currently connects only to other PieceBorder
+     * cells. Future semantic style resolvers may broaden that rule without
+     * changing the map format.
      */
     public WallTopology getBorderTopology(IGameField field, IntVector coords) {
         return WallTopology.of(
