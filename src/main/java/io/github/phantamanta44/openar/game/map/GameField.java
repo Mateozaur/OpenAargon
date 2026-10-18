@@ -158,13 +158,13 @@ public class GameField implements IGameField {
                                          || (p instanceof PieceBorder
                                             && LegacyRenderResolver.getTileSet() != LegacyTileSet.BASE);
 
-			int legacyRotation = rot;
-			if (p instanceof PieceBorder) {
-				legacyRotation = ((PieceBorder)p).getRenderRotation(this, c, rot);
-			}
-
+			/*
+			 * Border rotation numbers are renderer-specific. PieceBorder's native
+			 * topology normalization refers to columns in texture/border.png and
+			 * must not be reused as legacy atlas rotation indices.
+			 */
 			LegacyRenderResolver.Sprite legacySprite = useLegacyRenderer
-					? LegacyRenderResolver.resolve(p.getToken(), legacyRotation, meta)
+					? LegacyRenderResolver.resolve(p.getToken(), rot, meta)
 					: null;
 
 			if (legacySprite != null) {
