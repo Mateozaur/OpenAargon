@@ -30,3 +30,9 @@ that alternate atlases use the same tile indices as Base.
 
 `atlas=base` means "use the atlas belonging to the selected visual style".
 `exp1` and `exp2` remain fixed shared expansion atlases.
+
+A verified example is Selector (`I`, token code 73): the original
+`Pieces/selector.pce` explicitly selects `black_tiles_exp1.bmp`, and its
+`[PICTURES(COLOR,ROTATION)]` table matches the `atlas=exp1` entries in
+`render-map.csv`. Selector therefore does not receive per-style overrides such
+as entries in `styles/lp1.csv`.
