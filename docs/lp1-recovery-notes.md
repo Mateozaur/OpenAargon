@@ -63,8 +63,6 @@ Level Packs/Level Pack 1/Pictures/black_tiles_small.bmp
 
 LP1 contains no `black_tiles_exp*` files. Thus LP1 overrides only the ordinary pair; exp1/exp2 remain shared.
 
-LP1 ordinary sheets exactly match base ordinary sheets in byte size but differ in blob identity. This is strong structural evidence for same-shape content replacement, but not yet proof of semantic slot preservation.
-
 ### Repeated pack-local convention across all four level packs
 
 All four original Level Packs ship same-named ordinary tile sheets under their own `Pictures/` directories:
@@ -80,13 +78,11 @@ Level Pack 4 black_tiles.bmp        921654  3f63fff739958dc1473564d083d6dc725c52
 Level Pack 4 black_tiles_small.bmp   57654  97dbb2e35c8eb67c3b0e9f6e7bcd76fc6d08fddc
 ```
 
-The repeated directory and filename convention across LP1-LP4 is very strong architectural evidence that active Level Packs intentionally supply their own ordinary `black_tiles` resources. LP1, LP2 and LP4 have the same byte sizes as the shared/root pair. LP3 is a deliberate caveat: both LP3 files are exactly two bytes larger than the corresponding shared/other-pack files. Therefore do **not** claim that every pack uses a byte-identical BMP format merely from file size.
+The repeated directory and filename convention across LP1-LP4 is very strong architectural evidence that active Level Packs intentionally supply their own ordinary `black_tiles` resources. LP3 is a caveat: both LP3 files are exactly two bytes larger, so do not claim byte-identical BMP format from size alone.
 
 ### BMP-header inspection attempt
 
-Attempted to fetch the shared/base `black_tiles.bmp` blob (`2c1cebca0a437c2080352e48425150d3c374a533`) through the connected GitHub blob reader. The connector failed with `UnicodeDecodeError` because it tried to decode the binary blob as UTF-8. No bytes were returned and no repository state changed.
-
-Therefore width/height, bits-per-pixel, pixel offset, compression mode, and the exact reason for LP3's +2 bytes are not directly confirmed from the binary header. Arithmetic compatibility with a 54-byte 24-bit BMP header is only a hypothesis until binary bytes can be read.
+Attempted to fetch shared/base `black_tiles.bmp` as a binary blob. The GitHub connector failed with `UnicodeDecodeError` because it tried to decode the blob as UTF-8. No bytes were returned. BMP header fields and LP3's +2-byte cause remain unconfirmed.
 
 ## LP1 PACK.INI
 
@@ -99,76 +95,97 @@ SelectSkillDll=LevelPackOne
 IsEmpty=false
 ```
 
-No tile filename, `Pictures` path, atlas name, or resource-search-path field exists. Pack-local ordinary-sheet selection therefore is not explicitly configured in `PACK.INI`; any shadowing must come from general active-pack resource lookup.
+No tile filename, `Pictures` path, atlas name, or resource-search-path field exists. Pack-local ordinary-sheet selection is not explicitly configured in `PACK.INI`.
 
-## LP1 level-format evidence
+## LP1 level-format and shared-PCE evidence
 
-Enumerated `Level Packs/Level Pack 1/Levels/` and confirmed four skill directories: `Skill1`, `Skill2`, `Skill3`, `Skill4`.
+`Level Packs/Level Pack 1/Levels/` contains `Skill1`-`Skill4`. `Skill1/Level_001.map` (`LANDING LIGHTS`) is a plain token-oriented map plus `MAPTEXT`, `SCRIPT`, and copyright fields. It contains tokens including `O` and `S` but no tile-sheet filename, atlas name, picture-index table, or pack-local remapping table.
 
-Enumerated `Skill1/`; it contains ordinary `Level_###.map` files. Directly read `Skill1/Level_001.map` (`LANDING LIGHTS`). The file is a plain token-oriented board map plus `MAPTEXT`, `SCRIPT`, and copyright fields. It contains board tokens such as `n`, `O`, `C`, `S`, etc.; it contains **no tile-sheet filename, atlas name, picture-index table, or pack-local remapping table**.
+Representative token correlation against the **shared** `Pieces/*.pce` corpus:
 
-This is consistent with LP1 maps using the same token-to-piece-definition mechanism as the shared game. It is not yet sufficient by itself to identify every token or prove lookup precedence, so the next step is to correlate representative LP1 map tokens with the shared `.pce` `TOKEN` declarations and their ordinary/expansion atlas choices.
+```text
+LP1 map token O -> Pieces/coin.pce
+  TOKEN = O
+  no TilesFile / SmallTilesFile override
+  therefore uses documented ordinary defaults black_tiles.bmp / black_tiles_small.bmp
+
+LP1 map token S -> Pieces/source.pce
+  TOKEN = S
+  no TilesFile / SmallTilesFile override
+  therefore uses documented ordinary defaults black_tiles.bmp / black_tiles_small.bmp
+
+Pieces/spaceship.pce (contrast case)
+  TOKEN = p
+  TilesFile = black_tiles_exp1.bmp
+  SmallTilesFile = black_tiles_small_exp1.bmp
+```
+
+`brick.pce` was also re-read during this correlation pass: it has `TOKEN = #`, no tile-file override, and therefore uses the ordinary defaults. `#` is not one of the representative LP1 `Level_001.map` tokens being used for this particular proof, but the read reconfirms the ordinary/default behavior.
+
+This is important evidence: an actual LP1 level uses shared PCE tokens whose shared definitions select the **ordinary logical filename** by default, while LP1 provides its own same-named `Pictures/black_tiles.bmp` and has no alternate PCE/index table. Expansion use remains explicit inside shared PCE definitions (e.g. `spaceship.pce` and previously `selector.pce`), and LP1 does not supply pack-local expansion sheets.
+
+The combined data strongly supports this original-game contract:
+
+1. LP1 maps store shared piece tokens rather than atlas/index remaps.
+2. Shared PCE definitions convert those tokens/state into picture indices and choose ordinary vs expansion logical tile-sheet names.
+3. LP1 supplies a same-named ordinary `black_tiles.bmp` resource, while expansion sheets remain shared.
+4. Therefore LP1's ordinary sheet must be usable at the picture indices emitted by the shared PCE definitions for the original LP1 levels to render the intended pieces.
+
+This is substantially stronger evidence for semantic index preservation than equal dimensions alone. A direct loader-code trace or binary image comparison would still be useful as an independent confirmation, but there is now no evidence supporting arbitrary LP1 index remapping or sparse overrides.
 
 ## PCE inventory checkpoint
 
-Authoritative `Pieces/` listing contains 29 `.pce` files:
-
-```text
-blackhole blank brick coin complex convert double doubleslit explosion filter
-fuelcell lbender mine mirror oneway polarizer prism prismirror refractor selector
-slime source spaceship splicer splitter threeway tnt water wood
-```
-
-`blank.pce` documents defaults:
+Authoritative `Pieces/` listing contains 29 `.pce` files. `blank.pce` documents defaults:
 
 ```text
 TilesFile default:      black_tiles.bmp
 SmallTilesFile default: black_tiles_small.bmp
 ```
 
-Direct reads so far:
+Direct reads/classifications so far:
 
 ```text
 blackhole.pce   explicit exp1
 blank.pce       format/default documentation
-brick.pce       ordinary/default
-coin.pce        ordinary/default
+brick.pce       ordinary/default; TOKEN #
+coin.pce        ordinary/default; TOKEN O; directly used by LP1 Level_001
 complex.pce     explicit exp1
-convert.pce     ordinary/default (indices 260..267 prove index magnitude does not identify atlas)
+convert.pce     ordinary/default
 double.pce      ordinary/default
 doubleslit.pce  ordinary/default
 explosion.pce   animation list only; no [FLAGS], intentionally unclassified
+source.pce      ordinary/default; TOKEN S; directly used by LP1 Level_001
+spaceship.pce   explicit exp1; TOKEN p; contrast case
 ```
-
-GitHub code search for `TILESFILE` returned zero indexed results despite direct proof that declarations exist, so direct file reads are authoritative.
 
 ## Current open questions
 
-1. What general loader/search-path behavior makes active-pack `Pictures/black_tiles.bmp` shadow the shared/base sheet?
-2. Correlate LP1 map tokens with shared `.pce` `TOKEN` declarations and atlas choices.
-3. Do LP1 ordinary tile slots preserve the semantic ordering expected by shared PCE picture indices?
-4. Does OpenAargon's `lp1.png` directly correspond to LP1's pack-local `black_tiles.bmp` with coordinates/order preserved?
-5. What explains LP3's +2-byte BMP size difference?
+1. Can active-pack lookup precedence be independently confirmed from original executable/config strings or another text-readable source?
+2. Can OpenAargon's `lp1.png` be independently tied to LP1's original `black_tiles.bmp` with coordinate/order preservation?
+3. Are there any shared ordinary-PCE indices that actually deviate semantically in LP1? Current evidence points toward preservation, not remapping.
+4. What explains LP3's +2-byte BMP size difference?
 
 ## Action log — 2026-10-18
 
-- Resumed `linux-modernization`; read this note before touching mappings/code.
+- Resumed `linux-modernization`; read and continuously updated this note before/after investigation batches.
 - Corrected initial bad repo owner probe; correct repo is `Mateozaur/OpenAargon`.
-- Read branch/tree; inventoried CE assets, LP1 `PACK.INI`, shared/pack-local tile sheets, and PCE directory.
+- Inventoried CE assets, LP1 `PACK.INI`, shared/pack-local tile sheets, sibling Level Packs, PCE directory, and LP1 levels.
 - Attempted shallow local clone; failed because execution environment could not resolve `github.com`; no project state changed.
 - Confirmed LP1-LP4 all carry pack-local same-named ordinary `black_tiles` pairs; LP3 pair is +2 bytes.
 - Confirmed LP1 has no local `black_tiles_exp*`; expansion atlases remain shared.
-- Direct-read PCE batches through `explosion.pce`; documented ordinary defaults and exp1 exceptions discovered so far.
-- Repository indexed searches for `TILESFILE`, `Level Packs`, and `LevelPack` did not expose loader source and are treated as indexing/source-availability limits.
-- Attempted binary BMP blob read for header inspection; failed with `UnicodeDecodeError`; logged as a connector limitation.
-- Enumerated LP1 `Levels/` and confirmed `Skill1`-`Skill4` directories.
-- Enumerated LP1 `Levels/Skill1/` and identified its `Level_###.map` files.
-- Fetched `Skill1/Level_001.map` and confirmed it is a token-oriented board map with no embedded atlas/picture-index/remap metadata.
+- Direct-read PCE batches and documented ordinary defaults / exp1 exceptions.
+- Indexed searches for `TILESFILE`, `Level Packs`, and `LevelPack` did not expose loader source; treated as indexing/source-availability limits.
+- Attempted binary BMP blob read for header inspection; failed with `UnicodeDecodeError`; logged as connector limitation.
+- Enumerated LP1 `Levels/`, `Skill1/`, and fetched `Skill1/Level_001.map`; confirmed token-map format without atlas/index/remap metadata.
+- Re-read `brick.pce`, `source.pce`, `coin.pce`, and `spaceship.pce` to correlate actual LP1 map tokens and contrast ordinary/default vs explicit exp1 selection.
+- Confirmed `Level_001.map` token `O` resolves through shared `coin.pce` ordinary/default and token `S` through shared `source.pce` ordinary/default; confirmed `spaceship.pce` token `p` explicitly selects exp1.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
 
 ## Resume here
 
-Correlate representative tokens in LP1 `Skill1/Level_001.map` (`n`, `O`, `C`, `S`, etc.) with shared `Pieces/*.pce` `TOKEN` declarations and their picture tables/atlas choices. If LP1 maps demonstrably use ordinary shared PCE definitions while LP1 supplies only a same-named ordinary sheet and no alternate PCE/index table, that substantially strengthens the semantic index-preservation case. Do not add LP1 mapping overrides unless a concrete deviation is found.
+The strongest current result is the resource/index contract: actual LP1 levels use shared PCE tokens; ordinary shared PCE definitions emit their established indices against logical `black_tiles.bmp`; LP1 supplies that same logical filename locally and has no alternate PCE/remap table, while expansions remain explicitly separate. This strongly supports preserving existing `atlas=base` picture indices under LP1 rather than inventing LP1 overrides.
+
+Next, look for an independent confirmation of active-pack lookup precedence or PNG provenance. If none is available through text/binary limitations, finish enough PCE/token sampling to rule out an exceptional LP1 mapping mechanism, then record the conclusion that no new `styles/lp1.csv` rows are justified by current evidence.
 
 ```text
 Repository: Mateozaur/OpenAargon
