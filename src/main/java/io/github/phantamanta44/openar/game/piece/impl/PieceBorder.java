@@ -2,6 +2,7 @@ package io.github.phantamanta44.openar.game.piece.impl;
 
 import io.github.phantamanta44.openar.game.map.GameField;
 import io.github.phantamanta44.openar.game.map.IGameField;
+import io.github.phantamanta44.openar.game.piece.WallTopology;
 import io.github.phantamanta44.openar.util.math.IntVector;
 
 public class PieceBorder extends AbstractWallPiece {
@@ -44,25 +45,43 @@ public class PieceBorder extends AbstractWallPiece {
          * dragging a piece, fall back to the original map encoding.
          */
         if (field instanceof GameField) {
-            boolean north = isBorder(field, coords.getX(), coords.getY() - 1);
-            boolean east  = isBorder(field, coords.getX() + 1, coords.getY());
-            boolean south = isBorder(field, coords.getX(), coords.getY() + 1);
-            boolean west  = isBorder(field, coords.getX() - 1, coords.getY());
+            WallTopology topology = getBorderTopology(field, coords);
 
             /*
              * Native border.png variant 4 = west + east + south.
              * Native border.png variant 5 = west + east + north.
              */
-            if (west && east && south && !north) {
+            if (topology.hasWest()
+                    && topology.hasEast()
+                    && topology.hasSouth()
+                    && !topology.hasNorth()) {
                 return 4;
             }
 
-            if (west && east && north && !south) {
+            if (topology.hasWest()
+                    && topology.hasEast()
+                    && topology.hasNorth()
+                    && !topology.hasSouth()) {
                 return 5;
             }
         }
 
         return safeRot;
+    }
+
+    /**
+     * Derives board connectivity independently from the legacy rotation value.
+     * For now native border rendering only connects to other PieceBorder cells,
+     * preserving the existing behaviour exactly. Future style resolvers may
+     * choose a broader wall-like connectivity rule without changing this data
+     * model.
+     */
+    public WallTopology getBorderTopology(IGameField field, IntVector coords) {
+        return WallTopology.of(
+                isBorder(field, coords.getX(), coords.getY() - 1),
+                isBorder(field, coords.getX() + 1, coords.getY()),
+                isBorder(field, coords.getX(), coords.getY() + 1),
+                isBorder(field, coords.getX() - 1, coords.getY()));
     }
 
     private boolean isBorder(IGameField field, int x, int y) {
