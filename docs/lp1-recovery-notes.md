@@ -83,9 +83,17 @@ Level Pack 4 black_tiles.bmp        921654  3f63fff739958dc1473564d083d6dc725c52
 Level Pack 4 black_tiles_small.bmp   57654  97dbb2e35c8eb67c3b0e9f6e7bcd76fc6d08fddc
 ```
 
-The repeated directory and filename convention across LP1-LP4 is very strong architectural evidence that active Level Packs intentionally supply their own ordinary `black_tiles` resources. LP1, LP2 and LP4 have the same byte sizes as the shared/root pair. LP3 is a deliberate caveat: both LP3 files are exactly two bytes larger than the corresponding shared/other-pack files. Therefore do **not** claim that every pack uses a byte-identical BMP format merely from file size. Inspect BMP headers/dimensions before drawing format conclusions.
+The repeated directory and filename convention across LP1-LP4 is very strong architectural evidence that active Level Packs intentionally supply their own ordinary `black_tiles` resources. LP1, LP2 and LP4 have the same byte sizes as the shared/root pair. LP3 is a deliberate caveat: both LP3 files are exactly two bytes larger than the corresponding shared/other-pack files. Therefore do **not** claim that every pack uses a byte-identical BMP format merely from file size.
 
 This repeated convention is still not direct code-level proof of lookup precedence and is not, by itself, proof that each tile index keeps the same semantic meaning. It does make accidental LP1 duplication extremely unlikely.
+
+### BMP-header inspection attempt
+
+Attempted to fetch the shared/base `black_tiles.bmp` blob (`2c1cebca0a437c2080352e48425150d3c374a533`) through the connected GitHub blob reader in order to parse its BMP header. The connector failed with a `UnicodeDecodeError` because it tried to decode the binary blob as UTF-8. No bytes were returned and no repository state changed.
+
+Therefore width/height, bits-per-pixel, pixel offset, compression mode, and the exact reason for LP3's +2 bytes are **not yet directly confirmed from the binary header**. Do not silently infer them as facts from file size alone.
+
+A useful arithmetic hypothesis for later validation is that 921654 = 54 + 640*480*3 and 57654 = 54 + 160*120*3, which is compatible with uncompressed 24-bit BMP payloads with 54-byte headers; LP3's +2-byte variants would then need an explanation such as header/padding/trailing-byte differences. This remains a hypothesis until binary headers can be read.
 
 ## LP1 PACK.INI
 
@@ -163,17 +171,13 @@ GitHub code search for `TILESFILE` returned zero indexed results despite direct 
 - Searched repo code for `Level Packs` and `LevelPack`; both returned zero indexed source results.
 - Probed earlier recursive tree for `LevelPack`; no actionable loader-source evidence found.
 - Re-enumerated `Level Packs/` to identify sibling packs for structural comparison.
-- Enumerated `Level Pack 2/Pictures/` and searched returned inventory for `black_tiles`; confirmed LP2 pack-local ordinary pair.
-- Enumerated `Level Pack 3/Pictures/` and searched its returned inventory for `black_tiles`.
-- Confirmed LP3 pack-local `black_tiles.bmp` (921656 bytes, `a6bb5fe8...`) and `black_tiles_small.bmp` (57656 bytes, `f039e588...`). Noted the exact +2-byte difference from shared/LP1/LP2/LP4 equivalents rather than treating all pack BMPs as byte-size-identical.
-- Enumerated `Level Pack 4/Pictures/` and searched its returned inventory for `black_tiles`.
-- Confirmed LP4 pack-local `black_tiles.bmp` (921654 bytes, `3f63fff7...`) and `black_tiles_small.bmp` (57654 bytes, `97dbb2e3...`).
-- Concluded structurally that all four original Level Packs intentionally carry same-named ordinary tile sheets in pack-local `Pictures/`; this is strong evidence for an active-pack resource-shadowing convention, with lookup precedence and semantic slot preservation still requiring proof.
+- Enumerated LP2, LP3 and LP4 `Pictures/` and confirmed pack-local ordinary `black_tiles` pairs in all four Level Packs; recorded LP3's +2-byte exception.
+- Attempted direct binary blob read of shared/base `black_tiles.bmp` to inspect BMP header. The GitHub connector failed with `UnicodeDecodeError` while decoding binary as UTF-8; no header bytes were available. Logged this tool limitation rather than treating inferred header values as confirmed.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
 
 ## Resume here
 
-All LP1-LP4 packs now confirm the same pack-local ordinary `black_tiles` naming convention. LP3's pair is +2 bytes, so the next highest-value check is the BMP header/geometry for shared base, LP1, and LP3 (then LP4 if useful): width, height, bits-per-pixel, pixel-data offset, compression/header type. After that, correlate LP1's original BMP with OpenAargon's `lp1.png` to test whether conversion preserved pixel coordinates/tile order. Continue the PCE inventory after this higher-value provenance check. Do not add LP1 mapping overrides until a semantic deviation is proven.
+All LP1-LP4 packs confirm the pack-local ordinary `black_tiles` naming convention. Direct BMP-header inspection through the current GitHub blob reader is blocked by binary-to-UTF8 decoding. The next highest-value text-verifiable route is to prove the resource/index contract from shared PCE defaults plus pack contents and actual LP1 level usage, and/or find conversion provenance in repository history. If binary materialization becomes available, compare original LP1 BMP directly with OpenAargon's `lp1.png` to prove coordinate preservation. Continue PCE inventory only as needed to support this proof. Do not add LP1 mapping overrides until a semantic deviation is proven.
 
 ```text
 Repository: Mateozaur/OpenAargon
