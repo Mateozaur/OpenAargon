@@ -32,14 +32,30 @@ public final class LegacyRenderResolver {
         return tileSet;
     }
 
+    /**
+     * Backwards-compatible resolver using the currently selected board tileset.
+     */
     public static Sprite resolve(String token, int rotation, int meta) {
+        return resolve(token, rotation, meta, tileSet);
+    }
+
+    /**
+     * Resolves a legacy sprite against an explicit tileset. This makes legacy
+     * rendering usable as an adapter for per-cell visual styles without relying
+     * on mutable global renderer state.
+     */
+    public static Sprite resolve(
+            String token,
+            int rotation,
+            int meta,
+            LegacyTileSet selectedTileSet) {
         if (token == null || token.isEmpty()) return null;
         int pceColor = toPceColor(meta);
         int rot = Math.floorMod(rotation, 8);
         RenderDef def = DEFINITIONS.get(key(token.charAt(0), pceColor, rot));
         if (def == null) return null;
 
-        Atlas atlas = atlas(def.atlas);
+        Atlas atlas = atlas(def.atlas, selectedTileSet);
         int tile = def.tile;
         int col = tile % atlas.columns;
         int row = tile / atlas.columns;
@@ -56,10 +72,10 @@ public final class LegacyRenderResolver {
         return PCE_COLOR_BY_META[meta];
     }
 
-    private static Atlas atlas(String family) {
+    private static Atlas atlas(String family, LegacyTileSet selectedTileSet) {
         if ("exp1".equals(family)) return new Atlas("texture/legacy/exp1.png", 20, 8);
         if ("exp2".equals(family)) return new Atlas("texture/legacy/exp2.png", 8, 1);
-        LegacyTileSet set = tileSet;
+        LegacyTileSet set = selectedTileSet != null ? selectedTileSet : LegacyTileSet.BASE;
         return new Atlas(set.getTexturePath(), set.getColumns(), set.getRows());
     }
 
