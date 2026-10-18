@@ -32,7 +32,7 @@ Its picture values/offsets reproduce the existing Selector rows in `render-map.c
 
 ### LP1 skill DLL / downstream DLLs
 
-`PACK.INI` previously showed `SelectSkillDll=LevelPackOne`; reverse engineering of `RELEASE_LevelPackOne.dll` established that it implements LP1 skill/level-selection UI, not token-to-sprite mapping. `RELEASE_ItemMap.dll::MAP::SelectTile(CPosition)` and `RELEASE_TileBlitter.dll` are also not mapping sources.
+`PACK.INI` contains `SelectSkillDll=LevelPackOne`; reverse engineering of `RELEASE_LevelPackOne.dll` established that it implements LP1 skill/level-selection UI, not token-to-sprite mapping. `RELEASE_ItemMap.dll::MAP::SelectTile(CPosition)` and `RELEASE_TileBlitter.dll` are also not mapping sources.
 
 ## Atlas provenance checkpoint
 
@@ -55,9 +55,9 @@ The LP1 pack is:
 Aargon Deluxe Collectors Edition 1.4.CE/Level Packs/Level Pack 1/
 ```
 
-Its root contains exactly the relevant top-level entries `Levels/`, `PACK.INI`, `Pictures/`, and `Sounds/`.
+Its root contains `Levels/`, `PACK.INI`, `Pictures/`, and `Sounds/`.
 
-Most importantly, LP1's own `Pictures/` directory contains pack-local files with the ordinary logical tile-sheet names:
+LP1's own `Pictures/` directory contains pack-local files with the ordinary logical tile-sheet names:
 
 ```text
 Aargon Deluxe Collectors Edition 1.4.CE/Level Packs/Level Pack 1/Pictures/black_tiles.bmp
@@ -69,25 +69,36 @@ Aargon Deluxe Collectors Edition 1.4.CE/Level Packs/Level Pack 1/Pictures/black_
   size: 57654 bytes
 ```
 
-This directly confirms the earlier hypothesis that LP1 supplies its own ordinary `black_tiles.bmp` / `black_tiles_small.bmp` under the same filenames used by base-piece PCE definitions. It is strong structural evidence for pack-local graphic replacement while retaining shared PCE definitions. It is **not yet sufficient by itself** to prove that every tile slot keeps the same semantic index; resource lookup behavior and/or slot correspondence still needs validation.
+This directly confirms that LP1 supplies its own ordinary `black_tiles.bmp` / `black_tiles_small.bmp` under the same filenames used by base-piece PCE definitions. It is strong structural evidence for pack-local graphic replacement while retaining shared PCE definitions. It is **not yet sufficient by itself** to prove that every tile slot keeps the same semantic index.
+
+### LP1 PACK.INI exact content
+
+```ini
+[Params]
+Text = Try these levels in one of our secret deep space installations.
+Position = 7000
+Edit = false
+SelectSkillDll=LevelPackOne
+IsEmpty=false
+```
+
+`PACK.INI` contains no tile filename, `Pictures` path, atlas name, or resource-search-path setting. Therefore the LP1 `black_tiles.bmp` selection is **not configured explicitly in PACK.INI**. If the active pack's `Pictures/black_tiles.bmp` shadows the shared/base file, that behavior must come from general resource lookup / active-pack path logic elsewhere.
 
 ## Current open questions
 
-1. What exactly does LP1 `PACK.INI` configure about picture/resource lookup?
+1. What general loader/search-path code makes pack-local `Pictures/black_tiles.bmp` shadow the shared/base sheet?
 2. What are all `TILESFILE` / `SmallTILESFILE` values across `Pieces/*.pce` (base vs exp1/exp2)?
 3. Where are the root/base `black_tiles*.bmp` sheets and what are their blobs/sizes relative to LP1?
-4. Does the original loader resolve `TILESFILE=black_tiles.bmp` against the active pack's `Pictures/` before the shared `Pictures/` directory?
-5. Do LP1 `black_tiles.bmp` tile slots preserve the semantic ordering expected by shared PCE picture indices?
-6. Does OpenAargon's `lp1.png` correspond directly to LP1's pack-local `black_tiles.bmp`, with ordering preserved?
+4. Do LP1 `black_tiles.bmp` tile slots preserve the semantic ordering expected by shared PCE picture indices?
+5. Does OpenAargon's `lp1.png` correspond directly to LP1's pack-local `black_tiles.bmp`, with ordering preserved?
 
 ## Next validation steps
 
-1. Read LP1 `PACK.INI` exactly.
-2. Inventory root/base and all pack-specific `black_tiles*.bmp` files with exact paths/blobs/sizes.
-3. Inventory `Pieces/*.pce` `TILESFILE` / `SmallTILESFILE` declarations.
-4. Trace original resource/search-path behavior from configuration/code/assets.
-5. Correlate LP1 BMP with OpenAargon `lp1.png`; only if provenance is insufficient, compare cells on the 20x15 grid against PCE indices.
-6. Add `styles/lp1.csv` rows only for verified deviations. If slot semantics are preserved, the correct result may be no additional LP1 overrides.
+1. Inventory root/base and all pack-specific `black_tiles*.bmp` files with exact paths/blobs/sizes.
+2. Inventory `Pieces/*.pce` `TILESFILE` / `SmallTILESFILE` declarations.
+3. Trace original resource/search-path behavior from configuration/code/assets; `PACK.INI` itself has now been ruled out as the place where tile lookup is configured.
+4. Correlate LP1 BMP with OpenAargon `lp1.png`; only if provenance is insufficient, compare cells on the 20x15 grid against PCE indices.
+5. Add `styles/lp1.csv` rows only for verified deviations. If slot semantics are preserved, the correct result may be no additional LP1 overrides.
 
 ## Existing relevant commits
 
@@ -114,15 +125,16 @@ b21842799933df839472c8dd81fae84adc0c824e  create initial recovery notes
 - Enumerated `Pieces/` to establish the shared `.pce` corpus; full per-file `TILESFILE` inventory remains pending.
 - Enumerated LP1 `Pictures/` and specifically searched its returned directory data for `black_tiles`.
 - Confirmed LP1 contains its own `Pictures/black_tiles.bmp` (921654 bytes, blob `768d05581ab0a2a39beb9e29c492e869d07eb2fe`) and `Pictures/black_tiles_small.bmp` (57654 bytes, blob `e27ac267529a3f56020508c07775414f114a4032`).
+- Fetched LP1 `PACK.INI` and recorded its exact five parameters. Confirmed it contains no picture/tile/search-path configuration; it only includes descriptive/settings fields and `SelectSkillDll=LevelPackOne`.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
-- Next action: fetch and read LP1 `PACK.INI`, then record its exact fields before tracing resource lookup.
+- Next action: inventory shared/root `Pictures` tile sheets and compare their identities/sizes with LP1, then inventory PCE `TILESFILE` declarations.
 
 ## Resume here
 
-Read LP1 `PACK.INI` next. Then inventory the base/root `black_tiles*.bmp` sheets and shared PCE `TILESFILE` declarations. The newly confirmed fact to preserve is that LP1 has pack-local `Pictures/black_tiles.bmp` and `Pictures/black_tiles_small.bmp` under the ordinary filenames, so the investigation should now focus on proving lookup precedence and index preservation rather than asking whether such LP1 sheets exist.
+LP1 definitely has pack-local ordinary tile sheets. `PACK.INI` does not explicitly select them. Resume by finding the shared/base `black_tiles*.bmp` files and then trace the general active-pack resource lookup that can make LP1's same-named file take precedence. In parallel, complete the shared PCE `TILESFILE` inventory to establish which pieces are eligible for this base-sheet substitution.
 
 ```text
 Repository: Mateozaur/OpenAargon
 Branch: linux-modernization
-Latest live-note checkpoint commit before next action: 3ae4ec89451ca79d1435754036735c4ea90b023a
+Live-note checkpoint commit after LP1 PACK.INI read: 5f6a11bde61f97cefbc0172c8d6542c98d4615fe
 ```
