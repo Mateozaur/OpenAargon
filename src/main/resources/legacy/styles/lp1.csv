@@ -1,3 +1,6 @@
 tokenCode,piece,atlas,color,rotation,tile,animated,animationIndex
+# Selector (token I / 73) is verified to use the shared exp1 atlas:
+# original selector.pce specifies TILESFILE=black_tiles_exp1.bmp, so it must not
+# receive LP1-specific overrides here.
 # Add only entries verified against the original Level Pack 1 assets.
 # Missing entries intentionally fall back to legacy/render-map.csv during migration.
