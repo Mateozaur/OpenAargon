@@ -1,14 +1,9 @@
 package io.github.phantamanta44.openar.game.piece.impl;
 
-import io.github.phantamanta44.openar.game.beam.Beam;
 import io.github.phantamanta44.openar.game.map.IGameField;
-import io.github.phantamanta44.openar.game.piece.IGamePiece;
 import io.github.phantamanta44.openar.util.math.IntVector;
 
-import java.util.Collection;
-import java.util.Collections;
-
-public class PieceWall implements IGamePiece {
+public class PieceWall extends AbstractWallPiece {
 
     /*
      * OpenAargon's BeamColor ordinal order:
@@ -55,16 +50,6 @@ public class PieceWall implements IGamePiece {
     }
 
     @Override
-    public Collection<Beam> getReflections(
-            IGameField field,
-            IntVector coords,
-            int rot,
-            int meta,
-            Beam in) {
-        return Collections.emptyList();
-    }
-
-    @Override
     public String getTexturePath(
             IGameField field,
             IntVector coords,
@@ -80,7 +65,7 @@ public class PieceWall implements IGamePiece {
             int rot,
             int meta) {
 
-        int safeRot = ((rot % 8) + 8) % 8;
+        int safeRot = normalizeVariant(rot);
 
         int safeMeta = meta;
         if (safeMeta < 0 || safeMeta >= PCE_COLOR_BY_META.length) {
