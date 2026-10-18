@@ -74,36 +74,15 @@ An explicit search of the LP1 `Pictures/` inventory for `black_tiles_exp` return
 The shared/root `Pictures/` directory contains the complete ordinary/expansion tile-sheet family:
 
 ```text
-black_tiles.bmp
-  blob: 2c1cebca0a437c2080352e48425150d3c374a533
-  size: 921654 bytes
-black_tiles_exp1.bmp
-  blob: adc86dffc884c39574c46bd1f7cbf329378be876
-  size: 491576 bytes
-black_tiles_exp2.bmp
-  blob: 777e69561f964de3d335225b0d244b7c27b4e26b
-  size: 24630 bytes
-black_tiles_small.bmp
-  blob: f12083c95843dd58ee66f42dd5fe8569732d0a61
-  size: 57654 bytes
-black_tiles_small_exp1.bmp
-  blob: d6259db4d766c373db8d86c6851a0bbef84ef24d
-  size: 30776 bytes
-black_tiles_small_exp2.bmp
-  blob: f0df8506a8e4515c6c1ce53ce8dd7b0373bf44d3
-  size: 1590 bytes
+black_tiles.bmp                 921654 bytes  2c1cebca0a437c2080352e48425150d3c374a533
+black_tiles_exp1.bmp            491576 bytes  adc86dffc884c39574c46bd1f7cbf329378be876
+black_tiles_exp2.bmp             24630 bytes  777e69561f964de3d335225b0d244b7c27b4e26b
+black_tiles_small.bmp            57654 bytes  f12083c95843dd58ee66f42dd5fe8569732d0a61
+black_tiles_small_exp1.bmp       30776 bytes  d6259db4d766c373db8d86c6851a0bbef84ef24d
+black_tiles_small_exp2.bmp        1590 bytes  f0df8506a8e4515c6c1ce53ce8dd7b0373bf44d3
 ```
 
-The LP1 ordinary sheets have **exactly the same byte sizes** as the corresponding shared/base ordinary sheets while having **different blob identities**:
-
-```text
-base black_tiles.bmp       921654 bytes  2c1cebca...
-LP1  black_tiles.bmp       921654 bytes  768d0558...
-base black_tiles_small.bmp  57654 bytes  f12083c9...
-LP1  black_tiles_small.bmp  57654 bytes  e27ac267...
-```
-
-This is strong structural evidence that LP1 replaces the visual content of the ordinary sheet while retaining the same BMP dimensions/format footprint and therefore the same grid capacity. It still does **not** by itself prove that every tile slot keeps the same semantic meaning; that needs lookup/slot validation.
+The LP1 ordinary sheets have **exactly the same byte sizes** as the corresponding shared/base ordinary sheets while having **different blob identities**. This is strong structural evidence that LP1 replaces visual content while retaining the same BMP dimensions/format footprint and grid capacity. It is not yet proof that every tile slot keeps the same semantic meaning.
 
 ### LP1 PACK.INI exact content
 
@@ -116,7 +95,23 @@ SelectSkillDll=LevelPackOne
 IsEmpty=false
 ```
 
-`PACK.INI` contains no tile filename, `Pictures` path, atlas name, or resource-search-path setting. Therefore the LP1 `black_tiles.bmp` selection is **not configured explicitly in PACK.INI**. If the active pack's `Pictures/black_tiles.bmp` shadows the shared/base file, that behavior must come from general resource lookup / active-pack path logic elsewhere.
+`PACK.INI` contains no tile filename, `Pictures` path, atlas name, or resource-search-path setting. Therefore the LP1 `black_tiles.bmp` selection is not configured explicitly in `PACK.INI`; any shadowing must come from general active-pack resource lookup.
+
+## PCE inventory checkpoint
+
+The shared `Pieces/` directory contains exactly 27 `.pce` files:
+
+```text
+blackhole.pce blank.pce brick.pce coin.pce complex.pce convert.pce
+double.pce doubleslit.pce explosion.pce filter.pce fuelcell.pce lbender.pce
+mine.pce mirror.pce oneway.pce polarizer.pce prism.pce prismirror.pce
+refractor.pce selector.pce slime.pce source.pce spaceship.pce splicer.pce
+splitter.pce threeway.pce tnt.pce water.pce wood.pce
+```
+
+Correction: the list above contains 29 names, not 27; use the directory listing itself as authoritative and recount before recording a final count. This note intentionally records the discrepancy rather than silently trusting the preliminary count.
+
+A repository code-search query for `TILESFILE` scoped to this directory returned zero results. This is an indexing/search limitation already observed earlier and is **not** evidence that declarations are absent. The inventory must therefore read the `.pce` files directly.
 
 ## Current open questions
 
@@ -127,7 +122,7 @@ IsEmpty=false
 
 ## Next validation steps
 
-1. Inventory `Pieces/*.pce` `TILESFILE` / `SmallTILESFILE` declarations.
+1. Recount the `.pce` directory from the authoritative listing and read every file directly for `TILESFILE` / `SmallTILESFILE`.
 2. Trace original resource/search-path behavior from configuration/code/assets; `PACK.INI` itself has now been ruled out as the place where tile lookup is configured.
 3. Correlate LP1 BMP with OpenAargon `lp1.png`; only if provenance is insufficient, compare cells on the 20x15 grid against PCE indices.
 4. Add `styles/lp1.csv` rows only for verified deviations. If slot semantics are preserved, the correct result may be no additional LP1 overrides.
@@ -151,23 +146,18 @@ b21842799933df839472c8dd81fae84adc0c824e  create initial recovery notes
 - Searched that tree for `black_tiles`, `PACK.INI`, and `Pieces/` paths.
 - Attempted a shallow local clone into `/mnt/data/OpenAargon` for deterministic `find`/`rg`; it failed before checkout because the execution environment could not resolve `github.com`. No project files were modified by that attempt.
 - Switched back to the connected GitHub API.
-- Enumerated `Aargon Deluxe Collectors Edition 1.4.CE/` and confirmed `Level Packs/` and `Pieces/` are tracked directories.
-- Enumerated `Level Packs/` and confirmed `Level Pack 1/` is a distinct pack directory.
-- Enumerated `Level Packs/Level Pack 1/` and confirmed it contains `Levels/`, `PACK.INI` (155 bytes; blob `f4c248096b11a178b75f473efe59379246cf0a31`), `Pictures/`, and `Sounds/`.
-- Enumerated `Pieces/` to establish the shared `.pce` corpus; full per-file `TILESFILE` inventory remains pending.
-- Enumerated LP1 `Pictures/` and specifically searched its returned directory data for `black_tiles`.
-- Confirmed LP1 contains its own `Pictures/black_tiles.bmp` (921654 bytes, blob `768d05581ab0a2a39beb9e29c492e869d07eb2fe`) and `Pictures/black_tiles_small.bmp` (57654 bytes, blob `e27ac267529a3f56020508c07775414f114a4032`).
-- Fetched LP1 `PACK.INI` and recorded its exact five parameters. Confirmed it contains no picture/tile/search-path configuration; it only includes descriptive/settings fields and `SelectSkillDll=LevelPackOne`.
-- Fetched the shared/root `Aargon Deluxe Collectors Edition 1.4.CE/Pictures/` directory and filtered its returned inventory for `black_tiles`.
-- Recorded all six shared tile-sheet files (`ordinary`, `exp1`, `exp2`, and their `small` variants) with exact blobs and sizes.
-- Compared shared ordinary sheets with LP1 ordinary sheets: both full-size files are 921654 bytes and both small files are 57654 bytes, but each LP1 file has a different blob from its shared counterpart. Recorded this as structural evidence of same-shape content replacement, not yet semantic index proof.
-- Searched the LP1 `Pictures/` inventory explicitly for `black_tiles_exp`; the search returned zero matches. Recorded that LP1 overrides only the ordinary pair and leaves expansion atlases shared.
+- Enumerated CE root, `Level Packs/`, LP1 root, shared `Pieces/`, LP1 `Pictures/`, and shared/root `Pictures/`.
+- Confirmed LP1 contains pack-local ordinary `black_tiles.bmp` / `black_tiles_small.bmp`, equal in byte size but different in blob identity from the shared ordinary pair.
+- Confirmed LP1 contains no `black_tiles_exp*` files; expansion sheets remain shared.
+- Fetched LP1 `PACK.INI`; confirmed it contains no picture/tile/search-path configuration.
+- Retrieved the authoritative `Pieces/` directory listing and extracted all `.pce` names. A preliminary spoken count of 27 conflicted with the enumerated name list (29 names); this discrepancy is logged and will be corrected by recounting before conclusions.
+- Ran GitHub repository code search for `TILESFILE` scoped to the CE `Pieces` directory; it returned zero results. Because direct file evidence already proves `TILESFILE` exists (e.g. Selector), the zero result is treated only as a search-index limitation.
 - No `styles/lp1.csv` or functional code changes have been made during this pass.
-- Next action: begin the shared PCE `TILESFILE` / `SmallTILESFILE` inventory.
+- Next action: recount the authoritative `.pce` list, then fetch the files directly in batches and record their tile-sheet declarations.
 
 ## Resume here
 
-LP1 definitely has pack-local ordinary tile sheets, and those sheets match the shared ordinary sheets in byte size while differing in content blob. LP1 has no pack-local `black_tiles_exp*` files. `PACK.INI` does not explicitly select the ordinary sheets. Resume with the shared PCE `TILESFILE` declarations and then trace general active-pack lookup. The main remaining proof burden is semantic slot/index preservation.
+LP1 definitely has pack-local ordinary tile sheets of the same byte size as base, different content blobs, and no local expansion sheets. `PACK.INI` does not select them. GitHub code search cannot be trusted for PCE declarations. Resume by direct per-file PCE reads, recording each batch before moving on, then trace active-pack lookup. The main remaining proof burden is semantic slot/index preservation.
 
 ```text
 Repository: Mateozaur/OpenAargon
