@@ -92,6 +92,23 @@ public class PieceRegistry {
         return definition;
     }
 
+    /**
+     * Compatibility bridge for old APIs that still pass an implementation
+     * object instead of its canonical id/definition.
+     */
+    public static PieceDefinition getDefinition(IGamePiece piece) {
+        if (piece == null) {
+            return getDefinition(PieceId.of("air"));
+        }
+
+        PieceDefinition definition = CATALOG.getByLegacyToken(piece.getToken());
+        if (definition == null) {
+            Aargon.getLogger().warn("Unregistered piece implementation '{}'!", piece.getName());
+            return CATALOG.get(PieceId.of("air"));
+        }
+        return definition;
+    }
+
     public static IGamePiece getPiece(PieceId id) {
         PieceDefinition definition = CATALOG.get(id);
         if (definition == null) {
