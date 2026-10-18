@@ -157,8 +157,14 @@ public class GameField implements IGameField {
                                          || p instanceof PieceLegacyStub
                                          || (p instanceof PieceBorder
                                             && LegacyRenderResolver.getTileSet() != LegacyTileSet.BASE);
+
+			int legacyRotation = rot;
+			if (p instanceof PieceBorder) {
+				legacyRotation = ((PieceBorder)p).getRenderRotation(this, c, rot);
+			}
+
 			LegacyRenderResolver.Sprite legacySprite = useLegacyRenderer
-					? LegacyRenderResolver.resolve(p.getToken(), rot, meta)
+					? LegacyRenderResolver.resolve(p.getToken(), legacyRotation, meta)
 					: null;
 
 			if (legacySprite != null) {
