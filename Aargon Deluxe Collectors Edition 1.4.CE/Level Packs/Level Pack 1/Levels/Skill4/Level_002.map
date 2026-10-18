@@ -1,0 +1,16 @@
+=3 n=4 n=4 n=2Xn=4 n=4 n=4 n=4 n#4Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#6Bn=5 n
+=2 n/1 .R  .=2 n   .   .F Gn   .   .   .   .   .   .   .   .   .F Gn   .   .=6 n
+=2 n/1 .R  .=2 n   .   .F Rn   .   .   .   .   .   .   .   .   .F Yn   .   .=6 n
+=2 n/1 .R4 .=2 n   .   .F Mn   .F CnF MnF BnF RnF MnF BnF Cn   .F Gn   .   .=6 n
+=2 n/1 .R4 .=2 n   .   .F Cn   .F MnO Gn   .O Bn   .O MnF Bn   .F Cn   .   .=6 n
+=2 nL B.R  .=2 n   .   .F Yn   .F Cn   .F GnF YnF Bn   .F Mn   .F Mn   .   .=6 n
+=2 nI B.R  .=2 n   .   .F Gn   .F MnO BnF YnF MnF BnO BnF Rn   .F Gn   .   .=6 n
+=2 nP  .   .=2 n   .   .F Cn   .F Gn   .F BnF BnF Gn   .F Cn   .F Yn   .   .=6 n
+=2 n   .   .=2 n   .   .F Bn   .F Gn   .   .O Bn   .   .F Rn   .F Mn   .   .=6 n
+=2 n   .   .=2 n   .   .F Rn   .F  nF MnF GnF YnF BnF GnF Cn   .F  n   .   .=6 n
+=2 n   .   .=2 n   .   .F Bn   .   .   .   .   .   .   .   .   .F Rn   .   .=6 n
+=2 n   .   .=2 nS  n   .F Rn   .   .   .   .   .   .   .   .   .F Cn   .   .=6 n
+=1 n=  n=  n=3Xn=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=7 n
+MAPTEXT:[HACKER]
+SCRIPT:[]
+COPYRIGHT:[Copyright (C) 2001 TwilightGames. All rights reserved.]

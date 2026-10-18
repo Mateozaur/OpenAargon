@@ -1,0 +1,16 @@
+=3 n=4 n=4Xn=4 n=4 n=4 n=4 n=4 n#4 n#5 n#5 n#5 n#5 n#5 n#5 n#5 n#5 n#5 n#6 n=5 n
+=2 n   .=2 n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n=6 n
+=2 n   .=2 n#  n   .   .S3 n   .   .#  n#  n   .   .   .   .   .   .   .#  n=6 n
+=2 n   .=2 n#  n   .   .   .P3 .   .   .#  n#  n   .   .   .   .   .   .#  n=6 n
+=2 n   .=2 n#  n   .   ./2 .   .   .   .   .#  n#  n   .   .   .   .   .#  n=6 n
+=2 n   .=2 n#  n   .   .   .   .   .   .   .   .#  n#  n   .   .   .   .#  n=6 n
+=2 n   .=2 n#  n   .   .   .   .   .   .   .   ./4 .#  n#  n   .   .   .#  n=6 n
+=2 n   .=2 n#  n   .   .   .   .   .   .   .   .F RnF Bn#  n#  n   .O  n#  n=6 n
+=2 n   .=2 n#  n   .   .   .   .   .   ./  .   .F RnF Bn   .#  n   .   .#  n=6 n
+=2 n   .=2 n#  n   .   .   ./1 .   .   .   .   .F Gn   .   .P5 .   .   .#  n=6 n
+=2 n   .=2 n#  n   .   .   .   .   .   .   .   .F Gn   ./  .   .   .   .#  n=6 n
+=2 n   .=2 n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n#  n=6 n
+=1 n=  n=5Xn=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=7 n
+MAPTEXT:[FILTER WALL 2]
+SCRIPT:[]
+COPYRIGHT:[Copyright (C) 2001 TwilightGames. All rights reserved.]

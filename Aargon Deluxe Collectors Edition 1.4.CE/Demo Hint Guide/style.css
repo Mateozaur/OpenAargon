@@ -1,0 +1,69 @@
+BODY {
+	BACKGROUND-IMAGE: url(img/background.gif); COLOR: black; SCROLLBAR-TRACK-COLOR: #aaaaff; FONT-FAMILY: "Arial"; SCROLLBAR-BASE-COLOR: #5555ff
+}
+H1 {
+	FONT-SIZE: 17px; MARGIN-BOTTOM: 5px; COLOR: #ff1f01; LINE-HEIGHT: 16px; FONT-FAMILY: "Arial"
+}
+H3 {
+	FONT-SIZE: 16px; COLOR: blue; LINE-HEIGHT: 13px; FONT-FAMILY: "Arial"
+}
+A:link {
+	COLOR: blue; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+A:visited {
+	COLOR: blue; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+A:hover {
+	COLOR: red; FONT-FAMILY: "Arial"; TEXT-DECORATION: underline
+}
+A:active {
+	COLOR: blue; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+A.blacklink:link {
+	COLOR: #0000aa; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+A.blacklink:visited {
+	COLOR: #0000aa; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+A.blacklink:hover {
+	COLOR: red; FONT-FAMILY: "Arial"; TEXT-DECORATION: underline
+}
+A.blacklink:active {
+	COLOR: #0000aa; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+A.boldblacklink:link {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: #0000aa; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+A.boldblacklink:visited {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: #0000aa; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+A.boldblacklink:hover {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: red; FONT-FAMILY: "Arial"; TEXT-DECORATION: underline
+}
+A.boldblacklink:active {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: #0000aa; FONT-FAMILY: "Arial"; TEXT-DECORATION: none
+}
+.whitefixedfont {
+	FONT-SIZE: 14px; COLOR: white
+}
+.blackfixedfont {
+	FONT-SIZE: 14px; COLOR: black; FONT-FAMILY: "Arial"
+}
+.blackfixedboldfont {
+	FONT-WEIGHT: bold; FONT-SIZE: 14px; COLOR: black; FONT-FAMILY: "Arial"
+}
+.bluelinkfont {
+	FONT-WEIGHT: bold; FONT-SIZE: 16px; COLOR: blue; FONT-FAMILY: "Arial"
+}
+.title {
+	FONT-WEIGHT: bold; FONT-SIZE: 24px; MARGIN-BOTTOM: 5px; COLOR: #ff1f01; LINE-HEIGHT: 26px; FONT-FAMILY: "Arial"
+}
+.blackfixedjustfont {
+	FONT-SIZE: 14px; COLOR: black; FONT-FAMILY: "Arial"; TEXT-ALIGN: justify
+}
+.biglightbluetext {
+	FONT-WEIGHT: bold; FONT-SIZE: 18px; COLOR: #639cf9; FONT-FAMILY: "Arial"
+}
+.medlightbluetext {
+	FONT-WEIGHT: bold; FONT-SIZE: 13px; COLOR: #639cf9; FONT-FAMILY: "Arial"
+}

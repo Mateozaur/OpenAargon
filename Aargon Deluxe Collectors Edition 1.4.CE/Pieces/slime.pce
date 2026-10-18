@@ -1,0 +1,15 @@
+/////////////////////////////////////////////////////////////////////////////////
+//"Copyright (C) 2001 TwilightGames. All rights reserved."
+//SLIME.PCE
+
+[PICTURES(COLOR,ROTATION)]
+209, 209, 209, 209, 209, 209, 209, 209
+
+[FLAGS]
+TOKEN  = s
+
+[MOVING]
+Factory = Slime
+Graphic = sprslime.bmp
+Cols    = 12
+Rows    = 1

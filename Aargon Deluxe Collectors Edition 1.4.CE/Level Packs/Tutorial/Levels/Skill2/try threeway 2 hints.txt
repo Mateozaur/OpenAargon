@@ -1,0 +1,35 @@
+/////////////////////////////////////////////////////////////////////////////////
+//Copyright (C) 2001 TwilightGames. All rights reserved.
+
+DOITYOURSELF = 1
+
+[INTRO]
+TEXT        = THE OBJECT IS TO USE THE THREEWAY TO MERGE COLORS.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+
+[HINT 1]
+TEXT        = PUT A MIRROR HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 3,5
+
+[HINT 2]
+TEXT        = PUT THE THREEWAY HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 7,5,UPPER_RIGHT
+
+[HINT 3]
+TEXT        = PUT ANOTHER MIRROR HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = PREVHINT,L
+POINTER     = 7,2,UPPER_RIGHT
+
+[FINISHED]
+TEXT_AREA   = 12,6,19,12
+TEXT        = CONGRATULATIONS YOU'VE COMPLETED THE SYSTEM!
+BUTTON1     = RESTART,L
+BUTTON2     = FINISH,R

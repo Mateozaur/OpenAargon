@@ -1,0 +1,165 @@
+<head>
+<title>Aargon Deluxe Instructions/Editor</title>
+</head>
+    <hr width="95%" align=center>
+    <h2>
+        Advanced Editor Options
+    </h2>
+    <blockquote>
+    <br>
+	<b>Creating walls and obstructions:</b>
+	<br>
+	Normally, when you create a level, you begin with a map that is surrounded by pieces
+	called <b>'wood'</b>. A wood piece is just like any other piece (such as a mirror or laser) 
+	however, it is special in that if you try to rotate it, it does not appear to rotate. 
+	Instead it changes into 8 different shapes that can be used to make region boundaries
+	that fit together nicely. The 8 different rotations of a wood piece are as follows:
+
+        <br>
+        <br>
+		<center><img src="editorwood.jpg" alt="Wood Pieces" border="3"></center>
+        <br>
+        <br>
+	
+	You will notice however, that 2 more shapes are required to create a level map that 
+	has 2 or more boundary regions. These are the two junction pieces that look like this:
+
+        <br>
+        <br>
+		<center><img src="editorwoodjunction.jpg" alt="More Wood Pieces" border="3"></center>
+        <br>
+        <br>
+	
+	Since there are only 8 rotations available for one piece, we decided to let these 
+	pieces be 2 rotations of a colored (or non-white) wood piece. So in order to make a 
+	piece like this, insert a wood piece where you would like it and change the color from 
+	white to anything else, then rotate until you have the piece you require.
+		<br>
+		<br>
+    There is another type of piece that behaves similary to the wood piece. This piece is 
+	called a <b>'brick'</b>. The different rotations of a brick piece look like this:
+        <br>
+        <br>
+		<center><img src="editorbrick.jpg" alt="Brick Pieces" border="3"></center>
+        <br>
+        <br>
+	
+	Wood and bricks are different in the way that they interact with the laser light. A wood
+	piece will allow light to go half way through the piece, whereas a brick will not allow
+	any light to enter the piece.
+    <br>
+    <br>
+   Special note: THE 8th ROTATION OF THE WOOD PIECE IS INVISIBLE. This special rotation of the 
+   wood piece is used for creating tutorial levels in which case we would like to prevent the
+   user from placing a piece in certain places. This rotation should not be used when creating
+   a normal level.
+    <br>
+
+    <a name="AdvancedKeyboardSupport"></a>
+
+    <br>
+    <br>
+    <hr width="95%" align=center>
+	<b>Advanced keyboard support:</b>
+	<br>
+   The Aargon level editor fully supports the use of the keyboard while editing. In fact
+   all actions that may be performed with the mouse can also be done using
+   the keyboard.
+   <br>
+   <br>
+   The keys are used as follows:
+   <br>
+   <b>1) If a key is pressed that is associated with a piece from the piece list, then a new piece 
+   of that type to be created at the current cursor position (this is similar to painting).</b>
+   <br>
+   <br>
+   Otherwise, the keys have the following meaning:
+   <br>
+   <table>
+      <tr>
+         <td><b>Del</b></td><td> - Delete the item at the current cursor position.</td>
+      </tr>
+      <tr>
+         <td><b>Enter</b></td><td> - Clone the <b>selected piece</b> at the current cursor position.</td>
+      </tr>
+      <tr>
+         <td><b>Esc</b></td><td> - If in painting/cloning/erasing mode, terminates mode.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-C</b></td><td> - Copy current map to memory.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-V</b></td><td> - Paste copied map from memory into current map.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-M</b></td><td> - Toggle the <b>item-under-the-cursor</b>'s Moveable property.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-R</b></td><td> - Toggle the <b>item-under-the-cursor</b>'s Rotateable property.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-X</b></td><td> - Toggle both the <b>item-under-the-cursor</b>'s Moveable and Rotateable properties.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-O</b></td><td> - Load a level map from disk (Open).</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-F</b></td><td> - Save current map to file (Save As).</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-S</b></td><td> - Save changes to current map.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-T</b></td><td> - Test level.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-W</b></td><td> - Swap last copied level with current level.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-Z</b></td><td> - Undo last action.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-A</b></td><td> - Redo last undo.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-Y</b></td><td> - Redo last undo.</td>
+      </tr>
+      <tr>
+         <td><b>Ctrl-Enter</b></td><td> - Rename level.</td>
+      </tr>
+    </table>
+	<br>
+
+    All other keys work as they normally would while playing the game.
+	<br>
+	<br>
+
+   <b>Special Note:</b>
+   <br>
+   If the control key is held down while a piece is dragged, then 
+   when the item is dropped, the starting row and column of the item
+   will be swapped with the final row and column of the item. Notice the effect
+   in the two pictures below
+
+   <br>
+   <br>
+   <br>
+   
+   <table>
+      <tr>
+         <td><img src="ctrl_move_1.jpg" alt="Before the swap" border="3"></td>
+         <td></td>
+         <td><img src="ctrl_move_2.jpg" alt="Before the swap" border="3"></td>
+      </tr>
+      <tr>
+         <td>Before Swap</td>
+         <td></td>
+         <td>After Swap</td>
+      </tr>
+    </table>
+   
+    <br>
+	<center><I><a href="editor_index.htm">(back to editor index)</I></center><BR>
+
+    </blockquote>
+    <hr width="95%" align=center>

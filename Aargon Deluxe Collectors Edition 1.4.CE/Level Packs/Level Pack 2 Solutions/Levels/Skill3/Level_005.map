@@ -1,0 +1,16 @@
+=3 n=4 n=4 n=4 n=4 n=4 n=4 n=4 n#4Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#6Bn=5 n
+=2 nw  nw1 nw2 nw3 nw4 nw5 nw6 nw1 nw2 nw3 nw4 nw5 nw6 nw1 nw2 nw3 nw4 nw5 n=6 n
+=2 nw1 nw  nw3 nw2 nw5 nw4 n#1 n#1 n#1 nw4 nw3 nw6 nw5 nw2 nw1 nw4 nw3 nw5 n=6 n
+=2 nw  nw1 nw2 nw3 n#1 n#1 n#1 nO  n#1 n#1 n#1 n#1 nw6 nw1 nw2 nw3 nw4 nw  n=6 n
+=2 nw1 nw  nw3 nw2 n#1 nS2 nO  n   .+1 r+  r+1 r#1 nw1 nw6 nw3 nw2 nw5 nw4 n=6 n
+=2 nw  nw1 nw2 nw3 n#1 n#1 n#1 n@  nO  n   n   n#1 nw6 nw1 nw2 nw3 nw4 nw5 n=6 n
+=2 nw1 nw  nw3 nw2 nw5 nw4 n#1 n@  n+2 rO  n   n#1 nw1 nw6 nw3 nw2 nw5 nw4 n=6 n
+=2 nw  nw1 nw2 nw3 nw4 nw5 n#1 n+6 r@  n@  n   n#1 nw6 nw1 nw2 nw3 nw4 nw5 n=6 n
+=2 nw1 nw  nw3 nw2 nw5 nw4 n#1 n+1 r+  r+  r+7 r#1 nw1 nw  nw3 nw2 nw5 nw4 n=6 n
+=2 nw  nw  nw2 nw3 nw4 nw5 n#1 n#1 n#1 n#1 n#1 n#1 nw  nw1 nw2 nw3 nw4 nw5 n=6 n
+=2 nw1 nw1 nw3 nw2 nw5 nw4 nw1 nw3 nw6 nw2 nw5 nw4 nw1 nw  nw3 nw2 nw4 nw5 n=6 n
+=2 nw  nw1 nw2 nw3 nw4 nw5 nw6 nw1 nw2 nw3 nw4 nw5 nw  nw1 nw2 nw3 nw4 nw  n=6 n
+=1 n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=7 n
+MAPTEXT:[ISLAND]
+SCRIPT:[]
+COPYRIGHT:[Copyright (C) 2001 TwilightGames. All rights reserved.]

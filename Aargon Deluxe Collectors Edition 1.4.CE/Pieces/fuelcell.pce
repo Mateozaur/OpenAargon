@@ -1,0 +1,28 @@
+/////////////////////////////////////////////////////////////////////////////////
+//"Copyright (C) 2001 TwilightGames. All rights reserved."
+//FUELCELL.PCE
+
+[ANIMATION_LIST]
+16, 17, 18, 19, 36, 37, 38, 39, 56
+
+[ANIMATIONS(COLOR,ROTATION)]
+0, 0, 0, 0, 0, 0, 0, 0
+
+
+[WIN_LOSE_TABLE(COLOR,COLOR)]
+ 1, -1, -1, -1, -1, -1, -1, -1
+ 1, -1, -1, -1, -1, -1, -1, -1
+ 1, -1, -1, -1, -1, -1, -1, -1
+ 1, -1, -1, -1, -1, -1, -1, -1
+ 1, -1, -1, -1, -1, -1, -1, -1
+ 1, -1, -1, -1, -1, -1, -1, -1
+ 1, -1, -1, -1, -1, -1, -1, -1
+ 1, -1, -1, -1, -1, -1, -1, -1
+
+
+[FLAGS]
+TOKEN     = c
+LOOP      = TRUE
+ANIMATION = ON
+TilesFile=black_tiles_exp1.bmp
+SmallTilesFile=black_tiles_small_exp1.bmp

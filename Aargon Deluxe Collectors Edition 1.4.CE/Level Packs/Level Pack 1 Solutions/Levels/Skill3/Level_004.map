@@ -1,0 +1,16 @@
+=3 n=4 n=4 n=4 n=4 n=4 n=4 n=4 n#4 n#5 n#5 n#5 n#5 n#5 n#5 n#5 n#5 n#5 n#6 n=5 n
+=2 nO Rn   .   ./5 .   .   .   .   .   .   .   .   .   .   ./3 .   .   .O Rn=6 n
+=2 nX  n   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .X  n=6 n
+=2 nX  n   n   n   n   .   .O Xn   ./3 .   .O Xn   .   .   n   n   n   nX  n=6 n
+=2 nX  n   .   .   .   .   np  n   .   .   .p  n   n   .   .   .   .   .X  n=6 n
+=2 nX  n   .   .   .   .   .   .p  n   .p  n   .   .   .   .   .   .   nX  n=6 n
+=2 nX  n   n   n   .   .   nO Xn   .   .   .O Xn   n   .   .   n   n   nX  n=6 n
+=2 nX  n   .   .   n   .   .p  n   .   .   .p  n   .   .   .   .   .   .X  n=6 n
+=2 nX  n   .   .   .   .   n   .p  n   .p  n   .   n   .   .   .   .   .X  n=6 n
+=2 nX  n   n   n   n   .   .O Xn   .   .   nO Xn   .   .   n   n   n   nX  n=6 n
+=2 nX  n   .   .<2 .   .   .   n   .<4 .   .   n   .   .   .<6 .   .   .X  n=6 n
+=2 nO Rn   .   ./7 .   .   .   .   .S Rn   .   .   .   .   ./1 .   .   .O Rn=6 n
+=1 n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=7 n
+MAPTEXT:[4 ROOMS REVISITED]
+SCRIPT:[]
+COPYRIGHT:[Copyright (C) 2001 TwilightGames. All rights reserved.]

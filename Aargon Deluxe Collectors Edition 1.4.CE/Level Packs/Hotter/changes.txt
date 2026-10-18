@@ -1,0 +1,81 @@
+HOTTER THAN THE SUN Aargon Level Pack:
+
+===============================================================================
+=================================== CHANGES ===================================
+===============================================================================
+
+v13 changes / 2005 04 09:::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+[level]
+added conversions PS: even i dont remember the solution anymore, lol
+
+v12 changes / 2005 04 07:::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+some new and easy levels for you people :p
+
+[level]
+removed red alert
+added carnival
+added jigsaw
+added red is gone
+added golden and silver
+added aquamarine
+
+v11 changes / 2005 03 27:::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+[level]
+added zero cube
+added bugged chessboard
+added enduro on war
+added nutsplit
+added select*or die
+added red alert
+
+[changes]
+changed purple wires walls texture
+changed not so symmetric
+changed sbrubbles to fat noughts and crosses
+changed inverse moon
+
+[found better solutions]
+changed 3 double slit mirror from little secret to standard mirror
+removed 2 double slit mirrors from little secret
+removed 1 mirror from purple wires
+removed 1 double mirror from not so symmetric
+
+===============================================================================
+=================================== CREDITS ===================================
+===============================================================================
+--- Levels by iianimeii ---
+Purple Wires
+Reflections
+CMY
+Steel Prison
+Smallness
+Disco Dancin
+Little Secret
+Bender
+Mystic
+Mambo Pango
+Filtering Machine
+Surplus
+Sleipnir
+Not so symmetric
+The X
+Double Riddle
+Invisible Walls
+Superstar
+Inverse Moon
+*FAT* Noughts and Crosses
+Zero Cube
+Bugged Chessboard
+Nutsplit
+Carnival
+Jigsaw
+GOlden and Silver
+Red is Gone
+Aquamarine
+
+--- Levels by nukebr2001 ---
+Enduro on War
+Select*or die

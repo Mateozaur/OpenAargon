@@ -1,0 +1,16 @@
+=3 n=4 n=4 n=4Xn=4 n=4 n=4 n=4 n#4Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#5Bn#6Bn=5 n
+=2 n/3 .R1 .=2 n#4Rn   .   .   .O Rn   .   .   .   .   .   .   .#4Rn#4RnO Rn=6 n
+=2 n/3 .R1 .=2 n#4Rn   .#4Rn#4Rn#4Rn#4Rn#4Rn   .O Bn#4Rn   n#4Rn   .   .   .=6 n
+=2 n/3 .R1 .=2 n#4Rn   .#4Rn#4Rn#4Rn   .   .   .   .   .   .   .   .   .#4Rn=6 n
+=2 n/3 .R1 .=2 n#4RnO Rn#4Rn   .   .   .   .#4RnO Rn#4Rn   .   .   .#4RnO Gn=6 n
+=2 n/3 .R1 .=2 n#4Rn   .   .   .#4Rn   .#4Rn   .#4Rn#4Rn   .   .#4Rn#4Rn   .=6 n
+=2 n/3 .<4 .=2 n#4Rn   n   .O Rn   .O Bn   .   .   .   n   n#4Rn#4Rn   .   .=6 n
+=2 n/3 .<4 .=2 n   .   n#4Rn   .#4Rn   .#4Rn#4Rn   n   .O Gn#4Rn   .#4Rn#4Rn=6 n
+=2 n/3 .P6 .=2 nO Bn   .   .   .   n   .O Gn   .#4Rn#4Rn   .   n#4Rn   .#4Rn=6 n
+=2 n/3 .   .=2 n   .   n#4Rn   n#4Rn   .#4Rn#4Rn   .O Bn   .#4Rn#4Rn#4Rn#4Rn=6 n
+=2 n%7 .   n=2 n   n#4RnO Bn   .   .   .   .#4Rn   .   .   n#4Rn#4Rn#4Rn#4Rn=6 n
+=2 n%3 .   n=2 n   .   n#4Rn#4Rn#4RnS7 n   .   n   .#4Rn#4Rn#4Rn#4Rn#4Rn#4Rn=6 n
+=1 n=  n=  n=5Xn=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=  n=7 n
+MAPTEXT:[DISPATCHER]
+SCRIPT:[]
+COPYRIGHT:[Copyright (C) 2001 TwilightGames. All rights reserved.]

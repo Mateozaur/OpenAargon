@@ -1,0 +1,35 @@
+/////////////////////////////////////////////////////////////////////////////////
+//Copyright (C) 2001 TwilightGames. All rights reserved.
+
+DOITYOURSELF = 1
+
+[INTRO]
+TEXT        = THIS ONE IS NOT TOO HARD.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+
+[HINT 1]
+TEXT        = REFLECT THE BEAM DOWN WITH A MIRROR HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 8,3
+
+[HINT 2]
+TEXT        = REFLECT THE BEAM LEFT WITH A MIRROR HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 8,9
+
+[HINT 3]
+TEXT        = REFLECT THE BEAM UP WITH A MIRROR HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = PREVHINT,L
+POINTER     = 4,9,UPPER_RIGHT
+
+[FINISHED]
+TEXT_AREA   = 12,6,19,12
+TEXT        = EXCELLENT JOB!
+BUTTON1     = RESTART,L
+BUTTON2     = FINISH,R

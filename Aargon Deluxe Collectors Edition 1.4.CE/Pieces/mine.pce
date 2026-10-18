@@ -1,0 +1,16 @@
+/////////////////////////////////////////////////////////////////////////////////
+//"Copyright (C) 2001 TwilightGames. All rights reserved."
+//MINE.PCE
+
+[PICTURES(COLOR,ROTATION)]
+210, 210, 210, 210, 210, 210, 210, 210
+
+[FLAGS]
+TOKEN  = m
+
+
+[MOVING]
+Factory = Mine
+Graphic = Ballsprite.bmp
+Cols    = 4
+Rows    = 1

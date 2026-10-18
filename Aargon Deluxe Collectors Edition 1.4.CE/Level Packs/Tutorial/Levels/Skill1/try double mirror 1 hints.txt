@@ -1,0 +1,28 @@
+/////////////////////////////////////////////////////////////////////////////////
+//Copyright (C) 2001 TwilightGames. All rights reserved.
+
+DOITYOURSELF = 1
+
+[INTRO]
+TEXT        = THIS ONE SHOULD BE PRETTY EASY.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+
+[HINT 1]
+TEXT        = PLACE THE DOUBLE MIRROR HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 7,5
+
+[HINT 2]
+TEXT        = PUT THE REGULAR MIRROR HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = PREVHINT,L
+POINTER     = 4,5
+
+[FINISHED]
+TEXT_AREA   = 12,6,19,12
+TEXT        = WELL DONE! 
+BUTTON1     = RESTART,L
+BUTTON2     = FINISH,R

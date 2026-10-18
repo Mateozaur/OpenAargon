@@ -1,0 +1,17 @@
+/////////////////////////////////////////////////////////////////////////////////
+//"Copyright (C) 2001 TwilightGames. All rights reserved."
+//SPACESHIP.PCE
+
+[PICTURES(COLOR,ROTATION)]
+76, 76, 76, 76, 76, 76, 76, 76
+
+[FLAGS]
+TOKEN  = p
+TilesFile = black_tiles_exp1.bmp
+SmallTilesFile = black_tiles_small_exp1.bmp
+
+[MOVING]
+Factory = Spaceship
+Graphic = Spaceship.bmp
+Cols    = 12
+Rows    = 1

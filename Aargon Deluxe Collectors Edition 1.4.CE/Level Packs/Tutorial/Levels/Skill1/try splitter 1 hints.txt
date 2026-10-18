@@ -1,0 +1,28 @@
+/////////////////////////////////////////////////////////////////////////////////
+//Copyright (C) 2001 TwilightGames. All rights reserved.
+
+DOITYOURSELF = 1
+
+[INTRO]
+TEXT        = YOU SHOULD HAVE NO TROUBLE WITH THIS ONE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+
+[HINT 1]
+TEXT        = THE MIRROR COULD GO HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 3,6
+
+[HINT 2]
+TEXT        = THE SPLITTER COULD GO HERE.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = PREVHINT,L
+POINTER     = 6,6
+
+[FINISHED]
+TEXT_AREA   = 12,6,19,12
+TEXT        = CONGRATULATIONS YOU'VE COMPLETED THE SYSTEM!
+BUTTON1     = RESTART,L
+BUTTON2     = FINISH,R

@@ -1,0 +1,20 @@
+/////////////////////////////////////////////////////////////////////////////////
+//"Copyright (C) 2001 TwilightGames. All rights reserved."
+//CONVERT.PCE
+
+[DEFLECTION_LIST]
+-1, -1, 2, -1, -1, -1, 6, -1
+-1, -1, 2, -1, -1, -1, 6, -1
+-1, -1, 2, -1, -1, -1, 6, -1
+
+//Conversions for each direction.
+[CONVERSION]
+-1, -1, 1, -1, -1, -1, 2, -1
+-1, -1, 4, -1, -1, -1, 1, -1
+-1, -1, 2, -1, -1, -1, 4, -1
+
+[PICTURES(COLOR,ROTATION)]
+262, 263, 264, 265, 266, 267, 260, 261
+
+[FLAGS]
+TOKEN  = J

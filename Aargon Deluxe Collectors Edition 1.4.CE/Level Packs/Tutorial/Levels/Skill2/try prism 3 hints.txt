@@ -1,0 +1,42 @@
+/////////////////////////////////////////////////////////////////////////////////
+//Copyright (C) 2001 TwilightGames. All rights reserved.
+
+DOITYOURSELF = 1
+
+[INTRO]
+TEXT        = THE OBJECT IS TO USE THE PRISMS TO MERGE COLORS.
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+
+[HINT 1]
+TEXT        = HINT 1
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 4,7
+
+[HINT 2]
+TEXT        = HINT 2
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 3,6,UPPER_RIGHT
+
+[HINT 3]
+TEXT        = HINT 3
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 4,8,UPPER_RIGHT
+
+[HINT 4]
+TEXT        = HINT 4
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = PREVHINT,L
+POINTER     = 4,10,UPPER_RIGHT
+
+[FINISHED]
+TEXT_AREA   = 12,6,19,12
+TEXT        = CONGRATULATIONS YOU'VE COMPLETED THE SYSTEM!
+BUTTON1     = RESTART,L
+BUTTON2     = FINISH,R

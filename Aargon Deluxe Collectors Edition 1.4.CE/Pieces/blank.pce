@@ -1,0 +1,227 @@
+/////////////////////////////////////////////////////////////////////////////////
+//"Copyright (C) 2001 TwilightGames. All rights reserved."
+//BLANK.PCE
+
+/////////////////////////////////////////////////////////////////////////////////
+// PCE File format:
+//
+// Section: [FLAGS]
+// Meaning: This section defines the basic properties of the piece. There are 4 flags
+//          that can be defined as follows:
+//             1) "Token"
+//                 Type:      Character
+//                 Meaning:   This is the character in the .MAP file that represents the
+//                            piece.
+//                 Default:   None
+//             2) "Source"
+//                 Type:      Boolean
+//                 Meaning:   Indicates that this item is a source of laser light.
+//                 Default:   FALSE
+//             3) "Loop"
+//                 Type:      Boolean
+//                 Meaning:   If true, then if there is an animation defined for this piece,
+//                            then it will be played in a continuous loop.
+//                 Default:   FALSE
+//             3) "Animation"
+//                 Type:      Boolean (ON/OFF)
+//                 Meaning:   If ON, then if there is an animation defined for this piece,
+//                            then it will always be playing.
+//                 Default:   OFF
+//             4) "Alternate_Animations"
+//                 Type:      Character
+//                 Meaning:   If the piece has THIS property defined in the .MAP file, 
+//                            then the alternate animation set will be used.
+//             5) "TilesFile"  
+//                 Type:      String
+//                 Meaning:   Indicates the name of the graphic file where the tile
+//                            pictures for this piece are located.
+//                 Default:   black_tiles.bmp
+//             5) "SmallTilesFile"  
+//                 Type:      String
+//                 Meaning:   Indicates the name of the graphic file where the small
+//                            tile pictures for this piece are located.
+//                 Default:   black_tiles_small.bmp
+//
+// Section: [PICTURES(COLOR,ROTATION)]
+// Meaning: This section describes what picture will be displayed for the piece 
+//          depending on its orientation and color. There must be EITHER 8
+//          entries OR 8 * 8 = 64 entries for the piece. The leftmost entry indicates
+//          what picture will be displayed if the item has an orientation of '0', 
+//          (or NORTH) the next, an orientation of '1' (NORTH-EAST) and so on. If 
+//          there is only one row, the same pictures will be used regardless of the
+//          color of the piece. If not, the first column represents color '0', the second
+//          color '1' and so on. The numbers map to actual colors as follows:
+//                         0 == BLACK   (000)
+//                         1 == BLUE    (001)
+//                         2 == GREEN   (010)
+//                         3 == CYAN    (011)
+//                         4 == RED     (100)
+//                         5 == MAGENTA (101)
+//                         6 == YELLOW  (110)
+//                         7 == WHITE   (111)
+// Mandatory: IF AND ONLY IF [ANIMATION_LIST] is undefined (see below).
+// Default:   None.
+//
+// Section: [ANIMATION_LIST]
+// Meaning: This section is used to define a SET OF SETS of pictures used for animating
+//          a piece. Each row defines one animation sequence that may be referenced from 
+//          the [ANIMATIONS(COLOR,ROTATION)] section.
+// Mandatory: IF AND ONLY IF [PICTURES(COLOR,ROTATION)] is undefined.
+// Default: None.
+//
+// Section: [ANIMATIONS(COLOR,ROTATION)]
+// Meaning: This section has the same format as the [PICTURES(COLOR,ROTATION)] section 
+//          except that the entries refer to animations (defined in [ANIMATION_LIST]) 
+//          instead of single pictures.
+// Mandatory: IF AND ONLY IF [PICTURES(COLOR,ROTATION)] is undefined.
+// Default: 0, 0, 0, 0, 0, 0, 0, 0
+//          0, 0, 0, 0, 0, 0, 0, 0
+//          0, 0, 0, 0, 0, 0, 0, 0
+//          0, 0, 0, 0, 0, 0, 0, 0
+//          0, 0, 0, 0, 0, 0, 0, 0
+//          0, 0, 0, 0, 0, 0, 0, 0
+//          0, 0, 0, 0, 0, 0, 0, 0
+//          0, 0, 0, 0, 0, 0, 0, 0
+//
+// Section: [ALTERNATE_ANIMATION_LIST]
+// Meaning: The numbers here define animations in exactly the same way as in the
+//          [ANIMATION_LIST] section. If [ALTERNATE_ANIMATION_LIST] is defined, then 
+//          we may switch the animation set depending on some other property of 
+//          the piece. Currently there are 2 properties that may be used to switch
+//          to the alternate animation set. These are the MOVEABLE and ROTATABLE flags 
+//          In order to cause the alternate animation set to be used, we define 
+//          ALTERNATE_ANIMATIONS in the [FLAGS] section of the file to be either 
+//          'm' (the moveable flag) or 'r' (the rotatable flag).
+// Mandatory: No
+// Default: None.
+//
+// Section: [DEFLECTION_LIST]
+// Meaning: This section consists of 1 to 8 sets of 3 sets of 8 numbers (color matrix).
+//          The numbers represent how RED, GREEN and BLUE light are to be
+//          deflected based on the initial direction of the beam. The first
+//          set represents how RED light is redirected, the second GREEN and
+//          the third, BLUE. The first number in each set describes how light 
+//          entering from the SOUTH side (travelling NORTH) will be redirected, the 
+//          second SOUTH-WEST and so on. 
+//          The deflection entries specify the new direction of the laser beam. So,
+//          for instance if the 3nd entry on the second row was 7, then the piece
+//          will deflect a green laser that comes from the EAST to the NORTH-WEST.
+//          An entry of -1 will cause the light to be stopped. If there is more than 
+//          1 set of 3 in the list, AND there is no "[DEFLECTIONS(COLOR)]" section, 
+//          then ALL deflections in the list will be applied to an incoming beam.
+// Mandatory: No
+// Default: 0, 1, 2, 3, 4, 5, 6, 7, 8 (no deflection)
+//          0, 1, 2, 3, 4, 5, 6, 7, 8
+//          0, 1, 2, 3, 4, 5, 6, 7, 8
+//
+// Section: [DEFLECTIONS(COLOR)]
+// Meaning: This section defines which deflection in the DEFLECTION_LIST should be used
+//          based on the COLOR OF THE ITEM. There are 8 entries in this section, one for
+//          each color. 0 means 'use deflection 0', 1 means use deflection 1' and so on.
+//          An entry of -1 means to apply ALL defined deflections to the incoming beam.
+// Mandatory: No
+// Default: -1, -1, -1, -1, -1, -1, -1, -1
+//
+// Section: [CUT]
+// Meaning: This section describes how light within the rectangle (or tile) of the
+//          piece is trimmed. Normally, a laser beam travelling through, or 
+//          originating in a given tile will be completely drawn from end to end.
+//          If a piece deflects light, we want the incoming beam to be cut off
+//          in the middle of the tile and the outgoing beam to appear to originate 
+//          where the incoming one stops. We do this by defining a cut-matrix. There 
+//          are 16 'cuts', numbered from 0 to 15, and they are defined as follows:
+//          Cut 0: Remove all laser light (including glowing effect) below a horizontal 
+//          line going through the center of the tile.
+//          Cut 1-15: Each time, rotate the line by 45/2 degrees keeping the 'REMOVE'
+//                    region orientated the same way with respect to the cut line as 
+//                    it rotates.
+//          
+//          The numbers defined in this section describe how an an OUTGOING laser 
+//          is cut depending on direction and color. The format of the data is the 
+//          same format that is used for the DEFLECTION_LIST entries (3 sets of 8 
+//          numbers). Aargon determines the cut for the incoming laser based on the 
+//          cut of the outgoing laser. This is called smart cutting. Note that an 
+//          entry of -1024 means 'NO CUTTING'.
+//          Note as well that if there is more than one DEFLECTION_LIST entry, and
+//          more than one CUT is defined in the cut section then Aargon will apply
+//          the nth cut in the CUT section for the nth deflection in the DEFLECTION
+//          section (assuming there is no DEFLECTIONS(COLOR) section defined).
+//
+// Mandatory: No
+// Default: If light is deflected (blocking cut):
+//          0, 2, 4, 6, 8, 10, 12, 14
+//          0, 2, 4, 6, 8, 10, 12, 14
+//          0, 2, 4, 6, 8, 10, 12, 14
+//          For example, look at light going NORTH (entry 0). The outgoing beam will be
+//          cut in such a way as to SHOW all light in the NORTH half of the tile. Aargon
+//          determines that this means that the INCOMING beam will have a cut of 8 (show
+//          all light in the SOUTH half of the tile. In the case where the light is blocked
+//          from this direction (say a WOOD piece) we will see the incoming beam stopped
+//          in the center of the piece and NO outgoing beam.
+//
+//          If light is NOT deflected (no cut)
+//          -1024, -1024, -1024, -1024, -1024, -1024, -1024, -1024
+//          -1024, -1024, -1024, -1024, -1024, -1024, -1024, -1024
+//          -1024, -1024, -1024, -1024, -1024, -1024, -1024, -1024
+//
+// Section: [CONVERSION]
+// Meaning: This section is used to describe how primary colors are converted to other colors 
+//          by the piece. The format is similar to the deflection matrix (COLOR vs DIRECTION).
+// NOTE:    The current game implementation only allows for primary colors to be converted 
+//          to other primary colors. To be perfectly general, the conversion matrix should allow
+//          for conversion from secondary colors to primary and vice versa.
+//
+// Section: [WIN_LOSE_TABLE(COLOR,COLOR)]
+// Meaning: This section describes how lasers interacting with the piece may change the 'win' 
+//          status of that piece. The rules for deciding whether or not a level is won, lost, or
+//          neither are as folows:
+//             1) A level is considered 'won' if EVERY piece in the level has
+//                a winning status of 1. 
+//             2) A level is considered 'lost' if ANY piece has a winning status
+//                of -1 in which case the piece will 'explode'.
+//             3) A level is considered neither 'won' nor 'lost' if ANY piece has a
+//                winning status of 0.
+//          The Win-Lose table indicates what winning condition a piece has depending on the color
+//          of the piece and the color a laser interacting with the piece. 
+//          The columns of the matrix indicate the color of the laser and the rows indicate the 
+//          color of the piece.
+//          IMPORTANT NOTE:
+//          For a piece to achieve a win/lose value of ' 1', the laser must be NON-CROSSING. 
+//          For a piece to achieve a win/lose value of '-1', the laser MAY BE CROSSED with another beam.
+//
+// Section: [MOVING]
+// Meaning: The existence of this section indicates that the piece is a 'moving' piece (such as a mine 
+//          or slime). There are 4 flags in this section:
+//             1) "Graphic"
+//                 Type:      String.
+//                 Meaning:   The name of the graphic file containing the animation for the piece.
+//                 Default:   None.
+//                 Mandatory: Yes
+//             2) "Rows"
+//                 Type:      UINT
+//                 Meaning:   Number of rows in the graphic file animation.
+//                 Default:   1
+//                 Mandatory: No
+//             3) "Cols"
+//                 Type:      UINT
+//                 Meaning:   Number of columns in the graphic file animation.
+//                 Default:   1
+//                 Mandatory: No
+//             4) "Factory"
+//                 Type:      String.
+//                 Meaning:   The name of the .DLL file that contains the code
+//                            describing the piece's behaviour.
+//                 Mandatory: Yes
+//                 Note:      Currently we do not publish the libs and header files necessary
+//                            to create a moving object .DLL. 
+//                            If you have an idea and you wish to create a moving object, 
+//                            please contact:  info@twilightgames.com
+/////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////
+//Note: 256 and 257 are for gamma correction.
+[PICTURES(COLOR,ROTATION)]
+1, 256, 257, 1, 1, 1, 1, 1
+
+[FLAGS]
+TOKEN = ' '

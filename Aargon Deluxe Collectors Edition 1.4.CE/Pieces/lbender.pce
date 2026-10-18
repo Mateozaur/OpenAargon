@@ -1,0 +1,17 @@
+/////////////////////////////////////////////////////////////////////////////////
+//LBENDER.PCE
+
+
+[deflection_list]
+1 , 2, 3, 4, 5, 6, 7, 0
+1 , 2, 3, 4, 5, 6, 7, 0
+1 , 2, 3, 4, 5, 6, 7, 0
+
+
+[PICTURES(COLOR,ROTATION)]
+0, 0, 0, 0, 0, 0, 0, 0
+
+[FLAGS]
+TOKEN = '@'
+TilesFile=black_tiles_exp2.bmp
+SmallTilesFile=black_tiles_small_exp2.bmp

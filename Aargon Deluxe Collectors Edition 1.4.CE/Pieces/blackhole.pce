@@ -1,0 +1,22 @@
+/////////////////////////////////////////////////////////////////////////////////
+//"Copyright (C) 2001 TwilightGames. All rights reserved."
+//BLAKCHOKE.PCE
+
+[DEFLECTION_LIST]
+-1, -1, -1, -1, -1, -1, -1, -1
+-1, -1, -1, -1, -1, -1, -1, -1
+-1, -1, -1, -1, -1, -1, -1, -1
+
+
+[ANIMATION_LIST]
+140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151
+
+[ANIMATIONS(COLOR,ROTATION)]
+0, 0, 0, 0, 0, 0, 0, 0
+
+[FLAGS]
+TOKEN     = h
+LOOP      = TRUE
+ANIMATION = ON
+TilesFile = black_tiles_exp1.bmp
+SmallTilesFile = black_tiles_small_exp1.bmp

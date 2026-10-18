@@ -1,0 +1,35 @@
+/////////////////////////////////////////////////////////////////////////////////
+//Copyright (C) 2001 TwilightGames. All rights reserved.
+
+DOITYOURSELF = 1
+
+[INTRO]
+TEXT      = EACH HINT WILL BE A REFRACTOR POSITION.
+TEXT_AREA = 12,6,19,12
+BUTTON1   = HINT,R
+
+[HINT 1]
+TEXT        = HINT 1
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 5,6
+
+[HINT 2]
+TEXT        = HINT 2
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = HINT,R
+BUTTON2     = PREVHINT,L
+POINTER     = 7,4
+
+[HINT 3]
+TEXT        = HINT 3
+TEXT_AREA   = 12,6,19,12
+BUTTON1     = PREVHINT,L
+POINTER     = 9,2
+
+[FINISHED]
+TEXT_AREA=12,6,19,12
+TEXT = CONGRATULATIONS YOU'VE COMPLETED THE SYSTEM!
+BUTTON1=RESTART,L
+BUTTON2=FINISH,R
