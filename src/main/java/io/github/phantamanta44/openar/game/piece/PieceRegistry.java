@@ -79,6 +79,19 @@ public class PieceRegistry {
         return CATALOG.get(id);
     }
 
+    /**
+     * Resolves a legacy one-character map token into the canonical catalog.
+     * Unknown tokens retain the historical behaviour of becoming air.
+     */
+    public static PieceDefinition getDefinition(String legacyToken) {
+        PieceDefinition definition = CATALOG.getByLegacyToken(legacyToken);
+        if (definition == null) {
+            Aargon.getLogger().warn("Unknown piece '{}'!", legacyToken);
+            return CATALOG.get(PieceId.of("air"));
+        }
+        return definition;
+    }
+
     public static IGamePiece getPiece(PieceId id) {
         PieceDefinition definition = CATALOG.get(id);
         if (definition == null) {
@@ -89,12 +102,7 @@ public class PieceRegistry {
     }
 
     public static IGamePiece getPiece(String token) {
-        PieceDefinition definition = CATALOG.getByLegacyToken(token);
-        if (definition == null) {
-            Aargon.getLogger().warn("Unknown piece '{}'!", token);
-            return EMPTY;
-        }
-        return definition.getImplementation();
+        return getDefinition(token).getImplementation();
     }
 
 }
