@@ -84,6 +84,8 @@ The repeated directory and filename convention across LP1-LP4 is very strong arc
 
 Attempted to fetch shared/base `black_tiles.bmp` as a binary blob. The GitHub connector failed with `UnicodeDecodeError` because it tried to decode the blob as UTF-8. No bytes were returned. BMP header fields and LP3's +2-byte cause remain unconfirmed.
 
+The arithmetic `921654 = 54 + 640*480*3` and `57654 = 54 + 160*120*3` is compatible with ordinary 24-bit BMP payloads with 54-byte headers, but this remains a hypothesis until binary bytes can actually be inspected. Do not promote it to a confirmed fact.
+
 ## LP1 PACK.INI
 
 ```ini
@@ -171,6 +173,8 @@ source.pce      ordinary/default; TOKEN S; directly used by LP1 Level_001
 spaceship.pce   explicit exp1; TOKEN p; contrast case
 ```
 
+The inventory is intentionally incomplete because the higher-value architectural/token proof resolved the original LP1 base-index question without requiring all 29 files to be classified. If a future investigation needs exhaustive PCE coverage, resume from the remaining files rather than assuming they were read.
+
 ## Current conclusion
 
 For the question that motivated this pass — whether shared `atlas=base` picture indices should generally be remapped for LP1 — the evidence currently says **no**. The original asset structure and real LP1 level data support index preservation with a pack-local replacement of the ordinary `black_tiles.bmp`. OpenAargon's existing fallback model already implements that structure.
@@ -184,29 +188,84 @@ Independent confirmation still worth pursuing if binary access becomes available
 
 ## Action log — 2026-10-18
 
+This log is intended to include successful checks, negative searches, corrections, and failed tool/environment attempts so a future session does not unknowingly repeat them.
+
 - Resumed `linux-modernization`; read and continuously updated this note before/after investigation batches.
-- Corrected initial bad repo owner probe; correct repo is `Mateozaur/OpenAargon`.
-- Inventoried CE assets, LP1 `PACK.INI`, shared/pack-local tile sheets, sibling Level Packs, PCE directory, and LP1 levels.
-- Attempted shallow local clone; failed because execution environment could not resolve `github.com`; no project state changed.
-- Confirmed LP1-LP4 all carry pack-local same-named ordinary `black_tiles` pairs; LP3 pair is +2 bytes.
-- Confirmed LP1 has no local `black_tiles_exp*`; expansion atlases remain shared.
-- Direct-read PCE batches and documented ordinary defaults / exp1 exceptions.
-- Indexed searches for `TILESFILE`, `Level Packs`, and `LevelPack` did not expose loader source; treated as indexing/source-availability limits.
-- Attempted binary BMP blob read for header inspection; failed with `UnicodeDecodeError`; logged as connector limitation.
-- Enumerated LP1 `Levels/`, `Skill1/`, and fetched `Skill1/Level_001.map`; confirmed token-map format without atlas/index/remap metadata.
+- Corrected initial bad repo owner probe (`OpenAargon/OpenAargon` returned 404); correct repo is `Mateozaur/OpenAargon`.
+- Read branch metadata and recursively inspected the Collector's Edition tree; searched for `black_tiles`, `PACK.INI`, and `Pieces/` paths.
+- Attempted shallow local clone/checkout for deterministic local `find`/`rg`; failed before usable checkout because the execution environment could not resolve `github.com`. No project state changed.
+- Switched back to the connected GitHub API and enumerated CE root, `Level Packs/`, LP1 root, shared `Pieces/`, LP1 `Pictures/`, and shared/root `Pictures/`.
+- Fetched LP1 `PACK.INI`; confirmed it contains no picture/tile/search-path configuration.
+- Recorded the shared ordinary/expansion `black_tiles*` family with blob IDs and sizes.
+- Confirmed LP1 has pack-local ordinary `black_tiles.bmp` / `black_tiles_small.bmp`, same sizes as base but different blobs.
+- Explicitly checked LP1 `Pictures/` for `black_tiles_exp*`; none are present, so LP1 supplies no pack-local expansion sheets.
+- Retrieved the authoritative `Pieces/` listing. Corrected a preliminary spoken count from 27 to 29 after enumerating the names.
+- Ran indexed GitHub code search for `TILESFILE`; it returned zero results despite direct declarations in PCE files, so the result was classified as a search-index limitation rather than evidence of absence.
+- Direct-read PCE batch 1: `blackhole.pce`, `blank.pce`, `brick.pce`.
+- Direct-read PCE batch 2: `coin.pce`, `complex.pce`, `convert.pce`.
+- Noted that `convert.pce` uses ordinary defaults despite picture indices in the 260s; index magnitude must not be used to infer atlas family.
+- Direct-read PCE batch 3: `double.pce`, `doubleslit.pce`, `explosion.pce`; kept `explosion.pce` unclassified because it has no `[FLAGS]` section.
+- Searched repository/indexed source for literal `Level Packs` and `LevelPack`; no actionable loader source was returned. Negative result is treated as source/index availability limitation, not proof that lookup logic does not exist.
+- Re-enumerated sibling Level Packs and their `Pictures/` directories.
+- Confirmed LP2, LP3, and LP4 also ship same-named pack-local `black_tiles.bmp` / `black_tiles_small.bmp` pairs.
+- Recorded LP3's exact +2-byte exception for both ordinary sheets instead of generalizing all packs as byte-size-identical.
+- Attempted direct binary blob read of shared/base `black_tiles.bmp` to inspect BMP headers. The GitHub connector failed with `UnicodeDecodeError` while decoding binary as UTF-8; no header bytes were returned and no project state changed.
+- Enumerated LP1 `Levels/` and confirmed `Skill1`-`Skill4` directories.
+- Enumerated LP1 `Levels/Skill1/` and identified its `Level_###.map` files.
+- Fetched `Skill1/Level_001.map`; confirmed token-map format and absence of atlas/index/remap metadata.
 - Re-read `brick.pce`, `source.pce`, `coin.pce`, and `spaceship.pce` to correlate actual LP1 map tokens and contrast ordinary/default vs explicit exp1 selection.
-- Confirmed `Level_001.map` token `O` resolves through shared `coin.pce` ordinary/default and token `S` through shared `source.pce` ordinary/default; confirmed `spaceship.pce` token `p` explicitly selects exp1.
+- Confirmed real LP1 token `O` resolves through shared `coin.pce` ordinary/default and token `S` through shared `source.pce` ordinary/default; confirmed `spaceship.pce` token `p` explicitly selects exp1.
 - Fetched current `styles/lp1.csv`; confirmed it contains no override rows and intentionally relies on fallback to the shared render map.
 - Fetched `render-map.csv`; confirmed Coin (`79`) and Source (`83`) are mapped to `atlas=base` using their PCE-derived indices, while expansion pieces remain on explicit expansion atlases.
 - Searched the fetched render-map response for Source rows to verify the full Source animation-start sequence and adjacent Spaceship `exp1` mapping.
-- Recorded the conclusion that current OpenAargon fallback behavior matches the verified original LP1 resource/index contract; no new LP1 mapping rows are justified by this evidence.
-- No `styles/lp1.csv` or functional code changes have been made during this pass.
+- Recorded the conclusion that current OpenAargon fallback behavior matches the verified original LP1 resource/index contract; no new LP1 mapping rows are justified by current evidence.
+- No `styles/lp1.csv` or functional code changes were made during this investigation; only recovery/documentation notes were updated.
+
+## Session checkpoint / notes commits
+
+This resumed investigation started from the existing branch state around `b74ac775a35251dcfcac8ed9f52c4fde81558f9f`. The first explicit hand-off checkpoint requested before further work was committed as:
+
+```text
+9695a790  Checkpoint LP1 recovery investigation
+```
+
+Subsequent recovery-note checkpoints were written continuously while the investigation progressed. Known commits from this pass include:
+
+```text
+288e99d6  recovery-note update during asset/PCE audit
+6c99fcf3  record LP1-LP4 pack-local tile-sheet evidence
+2ac74af3  record BMP binary-reader limitation
+822df309  record LP1 level-format evidence
+0268560d  record shared-PCE token correlation
+26eda22c  record OpenAargon alignment and no-override conclusion
+```
+
+Some intermediate note commits may have additional full-length SHAs in branch history; the action log above, rather than commit messages alone, is the authoritative list of investigation actions and conclusions.
+
+### Completeness checkpoint before the next large step
+
+As of this checkpoint, the note explicitly preserves:
+
+- the safety rule against guessed LP1 overrides;
+- the Selector/exp1 resolution and DLL dead ends from prior work;
+- original CE asset-tree availability and atlas provenance gap;
+- LP1 `PACK.INI` contents and the negative result that it does not configure tile lookup;
+- shared/base and LP1-LP4 ordinary tile-sheet names, sizes, blob identities, LP1 lack of local expansion sheets, and LP3's +2-byte exception;
+- the failed local clone/DNS attempt and failed binary BMP/UTF-8 attempt;
+- indexed-search limitations and the corrected PCE file count;
+- every PCE file directly read/classified in this pass and the fact that the 29-file inventory was not completed;
+- representative real LP1 level token evidence (`O`, `S`) and the explicit exp1 contrast (`p`/Spaceship);
+- the OpenAargon `lp1.csv`/`render-map.csv` alignment check;
+- the final technical conclusion that existing shared indices should be preserved for LP1 and no new `styles/lp1.csv` rows are justified without a proven semantic deviation;
+- remaining independent-validation avenues if binary/provenance access becomes possible.
+
+No known material action or conclusion from this resumed pass is intentionally left only in chat state.
 
 ## Resume here
 
 The LP1 base-index question is now provisionally resolved in favor of **index preservation**: real LP1 maps use shared PCE token definitions; ordinary PCE definitions use logical `black_tiles.bmp`; every original Level Pack supplies a same-named pack-local ordinary sheet; LP1 supplies no expansion replacement or alternate PCE/remap table; and OpenAargon's current `atlas=base` fallback preserves those PCE-derived indices while switching the selected base atlas.
 
-Do not add LP1 overrides unless a specific index is proven semantically different. If continuing this investigation, prioritize independent binary/provenance confirmation rather than expanding speculative mappings.
+Do not add LP1 overrides unless a specific index is proven semantically different. If continuing this investigation, prioritize independent binary/provenance confirmation rather than expanding speculative mappings. The incomplete PCE inventory is available as a secondary route if such confirmation remains unavailable.
 
 ```text
 Repository: Mateozaur/OpenAargon
